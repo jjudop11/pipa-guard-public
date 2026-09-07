@@ -1,0 +1,91 @@
+{
+  "//": "프로젝트 루트에 .pipa.json 으로 복사해서 쓴다. 파일이 없으면 가장 보수적인 기준이 적용된다.",
+
+  "//exclude": "검사 대상에서 제외할 경로. 프로젝트 루트 기준 fnmatch 패턴이며, 'dir/' 로 끝내면 그 디렉터리 전체다.",
+  "exclude": [
+    "build/",
+    "generated/",
+    "src/test/"
+  ],
+
+  "//subjectType": "정보주체 구분. user = 이용자(제2조 제2호, 정보통신서비스를 이용하는 자)이며 K-ENC-001이 적용된다. non_user = 이용자가 아닌 정보주체이며 K-ENC-003이 적용된다. 확실하지 않으면 user 로 둔다.",
+  "subjectType": "user",
+
+  "//storageZone": "저장 위치. internet = 인터넷망 구간 또는 DMZ / internal = 제2조 제12호의 내부망. 알 수 없는 값은 예외를 인정하지 않는 internet처럼 판정한다. internal에서만 주민등록번호 외 고유식별정보의 범위 조정이 가능하다.",
+  "storageZone": "internet",
+
+  "//riskAssessment": "내부망의 주민등록번호 외 고유식별정보에 대해 암호화 미적용을 명시한 영향평가·위험도 분석 결과다. 객체 존재만으로는 예외가 되지 않는다. basis(privacy_impact_assessment 또는 risk_analysis)/document/date/conclusion/exemptItems가 모두 올바르고 exemptItems에 해당 사전 key가 있을 때만 적용한다. null 또는 불완전한 값이면 암호화를 요구한다.",
+  "riskAssessment": null,
+
+  "//inboundTransport": "개인정보를 받는 서버 endpoint의 외부 노출과 TLS 종단 계약. 코드만으로는 리버스 프록시·Ingress의 TLS 종단을 알 수 없으므로 네 필드를 모두 선언한다. exposure = internet/internal, tlsTermination = application/trusted_proxy/none, httpsOnly = 외부 HTTP를 허용하지 않는지, evidence = 실제 애플리케이션·Ingress·Gateway·네트워크 정책 경로. 누락·모순은 경고하며 internet + none + false는 차단한다.",
+  "inboundTransport": {
+    "exposure": "internet",
+    "tlsTermination": "trusted_proxy",
+    "httpsOnly": true,
+    "evidence": "deploy/k8s/ingress.yaml"
+  },
+
+  "//outputPolicies": "로그·API 응답의 출력 용도별 개인정보 허용 항목 계약. 각 항목에 sink(api/log), source(프로젝트 상대 파일#메서드), 비어 있지 않은 purpose와 evidence, pii_items.json의 key로 된 allowedItems를 모두 선언한다. 완전한 정책의 허용 범위 초과만 차단하고, 정책 누락·오타·중복·근거 누락은 경고한다. 빈 allowedItems는 해당 출력에서 개인정보를 허용하지 않는다는 뜻이다.",
+  "outputPolicies": [
+    {
+      "sink": "api",
+      "source": "src/main/java/com/example/member/ProfileController.java#profile",
+      "purpose": "회원 본인의 프로필 조회",
+      "allowedItems": [
+        "fullName",
+        "emailAddress"
+      ],
+      "evidence": "docs/privacy/self-profile.md"
+    },
+    {
+      "sink": "log",
+      "source": "src/main/java/com/example/member/LoginAuditService.java#recordFailure",
+      "purpose": "계정 탈취 조사용 로그인 실패 감사",
+      "allowedItems": [
+        "emailAddress"
+      ],
+      "evidence": "docs/privacy/login-audit.md"
+    }
+  ],
+
+  "//accessLogPolicies": "접속기록을 생성하는 logger 호출의 제2조 제3호 구성요소 계약. source는 프로젝트 상대 파일#메서드다. components의 actorId(식별자), accessedAt(접속일시), sourceInfo(접속지 정보), dataSubjectInfo(처리한 정보주체 정보), action(수행업무)를 모두 선언한다. 코드에서 직접 출력하는 값은 argument에 exact 식별자를 쓰고, logger timestamp·MDC·보안 컨텍스트 등이 공급하면 허용된 external 공급자와 실제 설정 evidence를 쓴다. 완전한 정책에서 직접 인자가 빠지면 차단하고, 정책 불완전은 경고한다.",
+  "accessLogPolicies": [
+    {
+      "source": "src/main/java/com/example/audit/AccessAuditService.java#recordAccess",
+      "components": {
+        "actorId": {"argument": "operatorId"},
+        "accessedAt": {"external": "logger_timestamp"},
+        "sourceInfo": {"external": "request_mdc"},
+        "dataSubjectInfo": {"argument": "memberId"},
+        "action": {"argument": "action"}
+      },
+      "evidence": "config/logback-access.xml"
+    }
+  ],
+
+  "//localStoragePolicies": "파일 저장 코드의 실제 실행·저장 위치 계약. source는 프로젝트 상대 파일#메서드, target은 workstation(개인정보취급자의 컴퓨터)/mobile(모바일 기기)/removable_media(보조저장매체)/server 중 하나, evidence는 실제 배포·운영 근거다. 보호 대상 위치의 평문 저장은 차단하고, 정책 누락·오타·중복·근거 누락은 경고한다. server는 제7조 제5항 범위 밖이지만 다른 저장 암호화 규칙은 그대로 적용된다.",
+  "localStoragePolicies": [
+    {
+      "source": "src/main/java/com/example/export/ProfileExportService.java#exportProfile",
+      "target": "workstation",
+      "evidence": "docs/privacy/operator-export.md"
+    },
+    {
+      "source": "src/main/java/com/example/report/ReportService.java#writeReport",
+      "target": "server",
+      "evidence": "deploy/report-service.yaml"
+    }
+  ],
+
+  "//riskAssessment_example": {
+    "basis": "risk_analysis",
+    "document": "docs/privacy/risk-assessment-2026H1.md",
+    "date": "2026-03-14",
+    "conclusion": "encryption_not_required",
+    "exemptItems": [
+      "passportNumber",
+      "driverLicenseNumber",
+      "alienRegistrationNumber"
+    ]
+  }
+}

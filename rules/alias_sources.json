@@ -1,0 +1,300 @@
+{
+  "_meta": {
+    "version": "0.2.0",
+    "audited_at": "2026-09-05",
+    "note": "pii_items.json의 모든 별칭이 어떤 공개 원문에 기대는지 연결한다. direct는 원문에 같은 표기나 정규화 동등 표기가 있는 경우, composed는 원문의 항목명·영문명·약어를 일반 식별자 표기로 조합한 경우, boundary는 다의성을 확인해 weak 경계를 정한 경우다.",
+    "common_standard_snapshot": {
+      "file_name": "공공데이터 공통표준(2025.11월).xlsx",
+      "sha256": "185fe34299e1ed8ccf02837bbe80b23cc21e76f109002c9ef1ab9d83fb3d8b12",
+      "sheets": [
+        "공통표준용어",
+        "공통표준단어",
+        "공통표준도메인"
+      ]
+    }
+  },
+  "sources": {
+    "common_standard_8": {
+      "url": "https://www.data.go.kr/bbs/ntc/selectNotice.do?originId=NOTICE_0000000004434",
+      "publisher": "행정안전부·공공데이터활용지원센터",
+      "evidence": "8차 공통표준 원본의 공통표준단어 번호 1185·2451·1710·1867·1810·1602·258에서 각각 Password/PSWD, Resident Registration Number/RRNO, Passport Number/PNO, Driver's License Number/DLN, Foreigner Registration Number/FRNO, Credit Card/CRCD, Account Number/ACTNO를 확인했다. 일반 개인정보 후보는 공통표준단어 번호 1354의 성명/FLNM/Full Name과 공통표준용어 번호 8030의 이메일주소/EML_ADDR, 번호 9205의 전화번호/TELNO, 번호 13120의 휴대전화번호/MBL_TELNO를 확인했다. 사용자·회원·고객 한정 이메일주소와 휴대전화번호 용어도 각각 원본에 있다. 반대로 공통표준단어 번호 813의 명/NM/Name은 사물·단체·현상까지 포함하며, 기관·업체·회사 이메일주소 용어도 있어 일반형의 다의성 경계로 삼았다."
+    },
+    "privacy_act_definition": {
+      "url": "https://law.go.kr/LSW/lsLawLinkInfo.do?chrClsCd=010202&lsJoLnkSeq=900040612",
+      "publisher": "국가법령정보센터",
+      "evidence": "개인정보 보호법 제2조 제1호가 성명 등을 통하여 개인을 알아볼 수 있는 정보를 개인정보로 정의한다."
+    },
+    "pipc_privacy_files": {
+      "url": "https://pipc.go.kr/np/default/contents.do?cIdx=229&isBlank=true",
+      "publisher": "개인정보보호위원회",
+      "evidence": "개인정보위가 등록·공개한 개인정보파일에서 성명, 전화번호, 이메일·전자우편·전자우편주소와 휴대전화번호를 개인정보 항목으로 명시한다."
+    },
+    "safety_standard": {
+      "url": "https://www.law.go.kr/LSW/admRulInfoP.do?admRulSeq=2100000281400&chrClsCd=010201",
+      "publisher": "개인정보보호위원회·국가법령정보센터",
+      "evidence": "비밀번호와 생체정보·생체인식정보의 정의, 주민등록번호·여권번호·운전면허번호·외국인등록번호·신용카드번호·계좌번호·생체인식정보의 법정 항목 범위를 확인했다."
+    },
+    "google_password_patterns": {
+      "url": "https://github.com/google/sgtm-event-data-filter",
+      "publisher": "Google 공개 저장소",
+      "evidence": "공개 PASSWORD 키 패턴에 password, passwd, pwd, pw, pswd, pass, passwrd 등이 명시돼 있다. 저장소도 과잉 필터 가능성을 경고하므로 짧은 pw와 pass는 weak로 둔다."
+    },
+    "microsoft_pword": {
+      "url": "https://github.com/MicrosoftDocs/PowerShell-Docs/blob/main/reference/5.1/Microsoft.PowerShell.Security/Get-Credential.md",
+      "publisher": "MicrosoftDocs 공개 저장소",
+      "evidence": "공식 PowerShell 문서 예제가 PWord 변수를 사용자의 Password 값에 연결한다."
+    },
+    "nist_credential": {
+      "url": "https://csrc.nist.gov/glossary/term/credential",
+      "publisher": "NIST",
+      "evidence": "credential은 비밀번호보다 넓은 인증 수단 개념이므로 후보에는 포함하되 weak로 둔다."
+    },
+    "toss_brandpay": {
+      "url": "https://docs.tosspayments.com/resources/glossary/brandpay",
+      "publisher": "토스페이먼츠",
+      "evidence": "간편결제에서 카드·계좌를 등록한 뒤 결제 비밀번호로 인증하는 공개 서비스 문맥을 확인했다."
+    },
+    "pci_glossary": {
+      "url": "https://www.pcisecuritystandards.org/glossary/",
+      "publisher": "PCI Security Standards Council",
+      "evidence": "PIN을 사용자를 인증하는 비밀 숫자 비밀번호로, PAN을 카드 발급사와 카드회원 계좌를 식별하는 Primary Account Number로 정의한다."
+    },
+    "toss_gift_pin_boundary": {
+      "url": "https://docs.tosspayments.com/resources/glossary/gift-certificate",
+      "publisher": "토스페이먼츠",
+      "evidence": "PIN이 인증 비밀번호가 아니라 게임문화상품권 번호로도 사용되는 반례다. PIN 단독·번호형 별칭을 weak로 정하는 근거다."
+    },
+    "public_jumin_repo": {
+      "url": "https://github.com/joonolee/framework2/blob/master/framework2/src/framework/util/ValidationUtil.java",
+      "publisher": "공개 GitHub 저장소",
+      "evidence": "juminNo를 주민등록번호·외국인등록번호 유효성 검사 인자로 사용한다. jumin 계열의 국내 개발 관행을 확인하는 공개 코드다."
+    },
+    "presidio_identifiers": {
+      "url": "https://github.com/data-privacy-stack/presidio/blob/main/docs/supported_entities.md",
+      "publisher": "Presidio 공개 저장소",
+      "evidence": "KR_RRN을 한국 주민등록번호로, US_SSN을 미국 Social Security Number로 별도 분류한다. RRN 관행과 SSN의 국가 의미 차이를 함께 확인한다."
+    },
+    "toss_core_api": {
+      "url": "https://docs.tosspayments.com/reference",
+      "publisher": "토스페이먼츠",
+      "evidence": "카드 번호 결제 요청의 cardNumber와 결제수단 응답의 bankAccountNumber 공개 필드를 확인했다."
+    },
+    "toss_account_api": {
+      "url": "https://docs.tosspayments.com/reference/additional",
+      "publisher": "토스페이먼츠",
+      "evidence": "계좌 유효성 확인 API의 accountNumber 공개 필드를 확인했다."
+    },
+    "kisa_biometric_guide": {
+      "url": "https://www.kisa.or.kr/2060301/form?lang_type=KO&postSeq=42",
+      "publisher": "한국인터넷진흥원",
+      "evidence": "생체인식 원본정보와 특징정보를 구분하고 얼굴·음성에서 인증·식별 목적의 특징점 추출 사례를 제시한다."
+    },
+    "nist_biometric_templates": {
+      "url": "https://www.nist.gov/system/files/documents/nvlap/NIST-HB150-25-2009-1.pdf",
+      "publisher": "NIST",
+      "evidence": "fingerprint, face, iris 등 생체 방식 전반에 Biometric Template Generator라는 기술 용어를 사용한다."
+    },
+    "nist_voiceprint": {
+      "url": "https://www.nist.gov/document/osac-2023-n-0023-standard-guide-forensic-speaker-recognition-landscaperegistry-version-20",
+      "publisher": "NIST OSAC",
+      "evidence": "voiceprint 표기와 화자 인식 문맥을 확인한다. 이 문서는 고전적 voiceprinting 방법론은 지지되지 않는다고도 명시하므로 용어의 기술적 한계를 함께 기록한다."
+    },
+    "facenet_paper": {
+      "url": "https://arxiv.org/abs/1503.03832",
+      "publisher": "FaceNet 원 논문",
+      "evidence": "얼굴 인식·검증·클러스터링에 쓰는 face embedding이라는 기술 표기를 확인한다. 목적이 없는 일반 임베딩과 구별하기 어려워 weak로 둔다."
+    }
+  },
+  "items": [
+    {
+      "key": "password",
+      "groups": [
+        {
+          "source": "common_standard_8",
+          "method": "direct",
+          "aliases": ["password", "pswd"]
+        },
+        {
+          "source": "google_password_patterns",
+          "method": "direct",
+          "aliases": ["passwd", "pwd", "pw", "passwrd", "pass"]
+        },
+        {
+          "source": "microsoft_pword",
+          "method": "direct",
+          "aliases": ["pword"]
+        },
+        {
+          "source": "toss_brandpay",
+          "method": "composed",
+          "aliases": ["simplepassword"]
+        },
+        {
+          "source": "nist_credential",
+          "method": "boundary",
+          "aliases": ["credential"]
+        }
+      ]
+    },
+    {
+      "key": "pin",
+      "groups": [
+        {
+          "source": "pci_glossary",
+          "method": "direct_or_composed",
+          "aliases": ["authpin", "loginpin", "pin", "pinno", "pincode", "pinnumber", "simplepin"]
+        }
+      ],
+      "boundary_sources": ["toss_gift_pin_boundary"]
+    },
+    {
+      "key": "residentRegistrationNumber",
+      "groups": [
+        {
+          "source": "common_standard_8",
+          "method": "direct_or_composed",
+          "aliases": ["residentregistrationnumber", "residentregistrationno", "residentregno", "residentnumber", "residentno", "rrno"]
+        },
+        {
+          "source": "presidio_identifiers",
+          "method": "direct_or_boundary",
+          "aliases": ["rrn", "ssn", "socialsecuritynumber"]
+        },
+        {
+          "source": "public_jumin_repo",
+          "method": "direct_or_composed",
+          "aliases": ["jumin", "juminno", "juminnumber"]
+        }
+      ]
+    },
+    {
+      "key": "passportNumber",
+      "groups": [
+        {
+          "source": "common_standard_8",
+          "method": "direct_or_composed",
+          "aliases": ["passportnumber", "passportno", "passportnum", "passport", "pno"]
+        }
+      ]
+    },
+    {
+      "key": "driverLicenseNumber",
+      "groups": [
+        {
+          "source": "common_standard_8",
+          "method": "direct_or_composed",
+          "aliases": ["driverlicensenumber", "driverlicenseno", "driverslicensenumber", "driverslicenseno", "drivinglicensenumber", "drivinglicenseno", "driverlicencenumber", "driverlicenceno", "driverlicense", "driverslicense", "licensenumber", "licenseno", "dln"]
+        }
+      ]
+    },
+    {
+      "key": "alienRegistrationNumber",
+      "groups": [
+        {
+          "source": "common_standard_8",
+          "method": "direct_or_composed",
+          "aliases": ["alienregistrationnumber", "alienregistrationno", "alienregno", "foreignerregistrationnumber", "foreignerregistrationno", "foreignregistrationnumber", "foreignregistrationno", "frno"]
+        }
+      ]
+    },
+    {
+      "key": "creditCardNumber",
+      "groups": [
+        {
+          "source": "common_standard_8",
+          "method": "direct_or_composed",
+          "aliases": ["creditcardnumber", "creditcardno", "creditcardnum", "crcdno", "creditcard"]
+        },
+        {
+          "source": "toss_core_api",
+          "method": "direct_or_composed",
+          "aliases": ["cardnumber", "cardno", "cardnum"]
+        },
+        {
+          "source": "pci_glossary",
+          "method": "direct",
+          "aliases": ["primaryaccountnumber", "pan"]
+        }
+      ]
+    },
+    {
+      "key": "accountNumber",
+      "groups": [
+        {
+          "source": "common_standard_8",
+          "method": "direct_or_composed",
+          "aliases": ["depositaccountnumber", "depositaccountno", "virtualaccountnumber", "virtualaccountno", "withdrawalaccountno", "refundaccountno", "accountnumber", "accountno", "acctnumber", "acctno", "actno"]
+        },
+        {
+          "source": "toss_core_api",
+          "method": "direct_or_composed",
+          "aliases": ["bankaccountnumber", "bankaccountno"]
+        }
+      ],
+      "additional_sources": ["toss_account_api"]
+    },
+    {
+      "key": "biometricRecognitionInfo",
+      "groups": [
+        {
+          "source": "safety_standard",
+          "method": "direct_or_composed",
+          "aliases": ["biometricrecognitioninfo", "biometricinfo", "biometric"]
+        },
+        {
+          "source": "nist_biometric_templates",
+          "method": "direct_or_composed",
+          "aliases": ["biometrictemplate", "fingerprinttemplate", "facetemplate", "iristemplate", "veintemplate"]
+        },
+        {
+          "source": "kisa_biometric_guide",
+          "method": "direct_or_composed",
+          "aliases": ["faceimage"]
+        },
+        {
+          "source": "facenet_paper",
+          "method": "direct",
+          "aliases": ["faceembedding"]
+        },
+        {
+          "source": "nist_voiceprint",
+          "method": "direct",
+          "aliases": ["voiceprint"]
+        }
+      ]
+    },
+    {
+      "key": "fullName",
+      "groups": [
+        {
+          "source": "common_standard_8",
+          "method": "direct_or_boundary",
+          "aliases": ["fullname", "flnm"]
+        }
+      ],
+      "additional_sources": ["privacy_act_definition"]
+    },
+    {
+      "key": "emailAddress",
+      "groups": [
+        {
+          "source": "common_standard_8",
+          "method": "direct_or_composed_or_boundary",
+          "aliases": ["useremailaddress", "memberemailaddress", "customeremailaddress", "emailaddress", "emailaddr", "email", "emladdr"]
+        }
+      ],
+      "additional_sources": ["pipc_privacy_files"]
+    },
+    {
+      "key": "mobilePhoneNumber",
+      "groups": [
+        {
+          "source": "common_standard_8",
+          "method": "direct_or_composed_or_boundary",
+          "aliases": ["usermobilephonenumber", "usermobiletelephonenumber", "membermobilephonenumber", "membermobiletelephonenumber", "customermobilephonenumber", "customermobiletelephonenumber", "mobilephonenumber", "mobilephoneno", "mobiletelephonenumber", "mobiletelephoneno", "phonenumber", "phoneno", "telephonenumber", "telephoneno", "telno", "mbltelno"]
+        }
+      ],
+      "additional_sources": ["pipc_privacy_files"]
+    }
+  ]
+}

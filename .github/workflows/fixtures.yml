@@ -1,0 +1,42 @@
+name: fixtures
+
+# 어느 기계에서 작업하든 fixture harness가 상태를 검증한다.
+# 문서와 harness가 어긋나면 harness가 옳다. (AGENTS.md)
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  harness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+
+      # 의존성 설치 단계가 없는 것은 의도된 것이다. 표준 라이브러리만 쓴다. (AGENTS.md 규칙 8)
+      - name: fixture harness — 판정
+        run: python3 tests/run_fixtures.py
+
+      - name: 계약 harness — 훅·CLI 입출력과 종료코드
+        run: python3 tests/run_hooks.py
+
+      # 종료코드를 뭉개면 오진한다. 이전 판은 사전이 깨져 exit 1 이 나도
+      # "차단 검출됨. .pipa.json exclude 확인 필요." 를 출력했다.
+      - name: 자기 검사 — 저장소 자신에 대해 CLI 실행
+        run: |
+          code=0
+          python3 bin/pipa_check.py . || code=$?
+          case $code in
+            0) echo "차단 0건." ;;
+            1) echo "::error::차단이 검출됐다. .pipa.json 의 exclude 설정을 확인한다."; exit 1 ;;
+            2) echo "::error::검사 대상이 없다. 경로나 지원 확장자가 바뀌었는지 확인한다."; exit 1 ;;
+            *) echo "::error::엔진 오류(종료코드 $code) — 판정하지 못했다. 위반 여부는 알 수 없다."; exit 1 ;;
+          esac

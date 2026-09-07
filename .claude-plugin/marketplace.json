@@ -1,0 +1,29 @@
+{
+  "name": "pipa-guard-public",
+  "owner": {
+    "name": "juahyun"
+  },
+  "description": "한국 개인정보 보호조치를 코드 작성 시점에 검사하는 Claude Code 플러그인 마켓플레이스입니다.",
+  "plugins": [
+    {
+      "name": "pipa-guard",
+      "source": {
+        "source": "github",
+        "repo": "jjudop11/pipa-guard-public",
+        "ref": "v0.1.0"
+      },
+      "description": "한국 개인정보 보호조치 위반을 Java·Kotlin 코드 작성 시점에 조항 근거와 함께 차단합니다.",
+      "version": "0.1.0",
+      "author": {
+        "name": "juahyun"
+      },
+      "category": "development",
+      "tags": [
+        "privacy",
+        "pipa",
+        "java",
+        "kotlin"
+      ]
+    }
+  ]
+}
