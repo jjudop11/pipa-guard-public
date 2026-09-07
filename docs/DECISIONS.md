@@ -1111,7 +1111,10 @@ Codex 마켓플레이스 이름은 기존 private 배포와 충돌하지 않는 
 플러그인 source는 `https://github.com/jjudop11/pipa-guard-public.git`의 `v0.1.0` 태그를 가리킨다.
 Claude Code도 같은 마켓플레이스 이름과 버전을 사용하되 공식 스키마에 맞는
 `.claude-plugin/marketplace.json`의 HTTPS URL source로 배포한다. `github` source는 실제 설치에서
-SSH clone을 선택해 SSH host key가 없는 새 환경에서 실패했으므로 사용하지 않는다. 두 제품의 설치 계약은
+SSH clone을 선택해 SSH host key가 없는 새 환경에서 실패했으므로 사용하지 않는다. Claude Code는
+표준 위치의 `hooks/hooks.json`을 자동으로 읽으므로 매니페스트의 `hooks` 필드로 같은 파일을 다시
+등록하지 않는다. 실제 설치에서 중복 훅으로 판정되어 플러그인 로드가 실패하는 것을 확인했기 때문이다.
+두 제품의 설치 계약은
 `tests/run_hooks.py` 한 케이스에서 매니페스트 이름·버전·저장소·태그·번들 훅과 함께 고정한다.
 
 MIT 라이선스 전문과 SECURITY.md를 공개 배포물에 포함한다. GitHub Actions의 기본 토큰 권한은

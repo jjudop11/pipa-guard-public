@@ -19,6 +19,5 @@
     "java",
     "kotlin",
     "spring"
-  ],
-  "hooks": "./hooks/hooks.json"
+  ]
 }

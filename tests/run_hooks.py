@@ -511,6 +511,8 @@ def _(tmp: str) -> list[str]:
          "Claude·Codex 매니페스트 버전이 다르다")
     want(problems, claude_manifest.get("repository") == manifest.get("repository"),
          "Claude·Codex 매니페스트의 저장소 URL이 다르다")
+    want(problems, "hooks" not in claude_manifest,
+         "Claude 매니페스트가 자동 발견되는 hooks/hooks.json을 중복 등록한다")
     want(problems, claude_marketplace.get("name") == "pipa-guard-public",
          "Claude 마켓플레이스 이름이 pipa-guard-public이 아니다")
     claude_entries = claude_marketplace.get("plugins")
