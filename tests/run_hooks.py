@@ -525,10 +525,11 @@ def _(tmp: str) -> list[str]:
         want(problems, claude_entry.get("version") == version,
              "Claude 마켓플레이스와 매니페스트 버전이 다르다")
         want(problems, isinstance(claude_source, dict) and
-             claude_source.get("source") == "github" and
-             claude_source.get("repo") == "jjudop11/pipa-guard-public" and
+             claude_source.get("source") == "url" and
+             claude_source.get("url") ==
+             "https://github.com/jjudop11/pipa-guard-public.git" and
              claude_source.get("ref") == "v0.1.0",
-             "Claude 마켓플레이스가 public Git 저장소 v0.1.0을 가리키지 않는다")
+             "Claude 마켓플레이스가 HTTPS public Git 저장소 v0.1.0을 가리키지 않는다")
 
     hooks = hook_config.get("hooks") if isinstance(hook_config, dict) else None
     want(problems, isinstance(hooks, dict), "번들 hooks 객체가 없다")
