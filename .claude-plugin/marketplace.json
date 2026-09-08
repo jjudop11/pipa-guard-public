@@ -10,10 +10,10 @@
       "source": {
         "source": "url",
         "url": "https://github.com/jjudop11/pipa-guard-public.git",
-        "ref": "v0.1.1"
+        "ref": "v0.1.2"
       },
       "description": "한국 개인정보 보호조치 위반을 Java·Kotlin 코드 작성 시점에 조항 근거와 함께 차단합니다.",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "author": {
         "name": "juahyun"
       },

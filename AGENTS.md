@@ -15,8 +15,8 @@
 ## 첫 명령
 
 ```bash
-python3 tests/run_fixtures.py     # 판정.        종료코드 0 = 전체 통과. 현재 163/163.
-python3 tests/run_hooks.py        # 입출력·패키지 계약. 종료코드 0 = 전체 통과. 현재 33/33.
+python3 tests/run_fixtures.py     # 판정.        종료코드 0 = 전체 통과. 현재 165/165.
+python3 tests/run_hooks.py        # 입출력·패키지 계약. 종료코드 0 = 전체 통과. 현재 34/34.
 python3 tests/run_claims.py       # README·배포 주장. 종료코드 0 = 전체 통과. 현재 10/10.
 python3 bin/pipa_check.py .       # 자기 검사.    차단 0 / 경고 0. exclude 회귀 방어.
 ```

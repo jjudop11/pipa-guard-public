@@ -1,7 +1,7 @@
 {
   "name": "pipa-guard",
   "displayName": "PIPA Guard",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "개인정보의 안전성 확보조치 기준(개인정보보호위원회 고시 제2026-9호)을 지원하는 Java·Kotlin 편집 시점에 검증하여 위반을 조항 근거와 함께 차단합니다.",
   "author": {
     "name": "juahyun"

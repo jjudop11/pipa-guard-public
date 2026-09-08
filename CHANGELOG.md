@@ -1,5 +1,11 @@
 # 변경 기록
 
+## 0.1.2 — 2026-09-08
+
+- 실제 Claude Code 합성 시나리오에서 발견한 AES 비밀번호 보조 메서드 미검출 수정
+- `Cipher` 결과가 반환값에 도달한 메서드와 비밀번호 저장 호출만 연결하는 얕은 전파 추가
+- 위반 V071·적법 C094와 실제 `Write` PreToolUse 차단 계약 추가
+
 ## 0.1.1 — 2026-09-08
 
 - README의 사전 차단 범위를 Claude Code `Write`·`Edit`와 Codex `apply_patch`로 명확히 제한

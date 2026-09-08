@@ -165,6 +165,7 @@ def hook_specific(problems: list[str], out: str, expect_event: str):
 
 
 VIOLATION_HIGH = "V001_PasswordAesEntity.java"     # cipher.doFinal(rawPassword...) — high
+VIOLATION_HELPER_HIGH = "V071_PasswordAesHelperReturn.java"  # AES 보조 메서드 반환 — high
 VIOLATION_WARN = "V010_PasswordUnsaltedSha256.java"  # salt·반복 없는 SHA-256 — medium
 COMPLIANT = "C001_BCrypt.java"
 VIOLATION_USER_STORAGE = "V012_ResidentNumberPlainColumn.java"
@@ -239,6 +240,25 @@ def _(tmp: str) -> list[str]:
     want(problems, "일방향 암호화" in reason, "차단 이유에 조항 원문이 없다")
     # 억제 지시자는 의도적으로 안내하지 않는다. 에이전트가 고치는 대신 도망가는 것을 막는다.
     want(problems, "pipa-guard:ignore" not in reason, "차단 이유가 억제 지시자를 안내한다")
+    want(problems, err == "", "stderr 에 출력이 있다: %r" % err[:120])
+    return problems
+
+
+@case("PreToolUse + AES 보조 메서드 비밀번호 저장 → deny")
+def _(tmp: str) -> list[str]:
+    problems: list[str] = []
+    code, out, err = engine([], event(
+        "PreToolUse", "Write",
+        file_path=os.path.join(tmp, "src", "Member.java"),
+        content=fixture("violation", VIOLATION_HELPER_HIGH),
+    ))
+    want(problems, code == 0, "종료코드가 0이 아니다: %d" % code)
+    hso = hook_specific(problems, out, "PreToolUse")
+    want(problems, hso.get("permissionDecision") == "deny",
+         "AES 보조 메서드 저장이 deny가 아니다: %r" % hso.get("permissionDecision"))
+    reason = hso.get("permissionDecisionReason") or ""
+    want(problems, "K-ENC-002/two-way" in reason,
+         "차단 이유에 K-ENC-002/two-way가 없다")
     want(problems, err == "", "stderr 에 출력이 있다: %r" % err[:120])
     return problems
 

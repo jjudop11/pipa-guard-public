@@ -979,9 +979,22 @@ def _crypto_receivers(src: Source) -> dict[str, tuple[str, str, int]]:
             ret = RETURN_RE.match(st.text)
             if ret and current_method is not None:
                 kind, label = classify(ret.group(1))
+                # 암호 결과를 Base64 문자열 등으로 감싸 반환하는 보조 메서드도 같은
+                # 양방향 흐름이다. 이름(encrypt*)이 아니라 이 메서드 안에서 실제 암호
+                # API가 만든 지역값이 반환식에 도달했다는 증거만 따른다. (V071, C094)
+                if kind is None:
+                    for match in IDENT_RE.finditer(ret.group(1)):
+                        inherited = receivers.get(normalize_ident(match.group(0)))
+                        if inherited is not None:
+                            kind, label, _origin_line = inherited
+                            break
                 if kind is not None:
                     factories.setdefault(current_method, (kind, label, st.line))
 
+    # rule_password_one_way가 `this.password = encrypt(rawPassword)`처럼 보조 메서드
+    # 호출 자체를 적용 지점으로 판정할 수 있게, 일반 수신자와 충돌하지 않는 키로 싣는다.
+    for name, value in factories.items():
+        receivers["@call:" + name] = value
     return receivers
 
 
@@ -996,6 +1009,18 @@ def _receiver_hit(statement: str, receivers: dict[str, tuple[str, str, int]]):
         use = RECEIVER_USE_RE % re.escape(m.group(0))
         if re.search(use, statement):
             return receivers[norm]
+
+    # 양방향 암호 API가 만든 값을 반환한다고 확인된 보조 메서드 호출. 메서드 선언
+    # 자체는 호출이 아니므로 같은 이름을 제외한다.
+    declared = _method_name(statement)
+    declared_norm = normalize_ident(declared) if declared is not None else None
+    for match in CALL_NAME_RE.finditer(statement):
+        name = normalize_ident(match.group(1))
+        if name == declared_norm:
+            continue
+        marker = receivers.get("@call:" + name)
+        if marker is not None:
+            return marker
     return None, None, 0
 
 
