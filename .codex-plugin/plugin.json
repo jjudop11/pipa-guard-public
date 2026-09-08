@@ -1,7 +1,7 @@
 {
   "name": "pipa-guard",
-  "version": "0.1.0",
-  "description": "한국 개인정보 보호조치 위반을 Java·Kotlin 코드 작성 시점에 조항 근거와 함께 차단합니다.",
+  "version": "0.1.1",
+  "description": "한국 개인정보 보호조치 위반을 지원하는 Java·Kotlin 편집 시점에 조항 근거와 함께 차단합니다.",
   "author": {
     "name": "juahyun",
     "url": "https://github.com/jjudop11"
@@ -20,7 +20,7 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "PIPA Guard",
-    "shortDescription": "코드 작성 전에 개인정보 보호조치 위반을 차단합니다.",
+    "shortDescription": "지원하는 코드 편집 전에 개인정보 보호조치 위반을 차단합니다.",
     "longDescription": "한국 개인정보 보호 관련 고시를 근거로 Java·Kotlin 코드의 저장·전송·로그·응답 보호조치를 검사하고, 확정적인 위반은 작성 전에 차단합니다.",
     "developerName": "juahyun",
     "category": "Productivity",

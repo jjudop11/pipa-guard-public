@@ -468,6 +468,7 @@ def _(tmp: str) -> list[str]:
     version = manifest.get("version") or ""
     want(problems, bool(re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?", version)),
          "플러그인 버전이 semver가 아니다: %r" % version)
+    expected_ref = "v" + version
     want(problems, manifest.get("skills") == "./skills/", "skills 경로가 기본 디렉터리가 아니다")
     want(problems, "hooks" not in manifest,
          "Codex 매니페스트에 지원하지 않는 hooks 필드를 넣었다")
@@ -496,8 +497,8 @@ def _(tmp: str) -> list[str]:
              "마켓플레이스와 매니페스트의 플러그인 이름이 다르다")
         want(problems, isinstance(source, dict) and source.get("source") == "url" and
              source.get("url") == "https://github.com/jjudop11/pipa-guard-public.git" and
-             source.get("ref") == "v0.1.0",
-             "Codex 마켓플레이스가 public Git 저장소 v0.1.0을 가리키지 않는다")
+             source.get("ref") == expected_ref,
+             "Codex 마켓플레이스 태그가 매니페스트 버전과 다르다")
         want(problems, isinstance(policy, dict) and
              policy.get("installation") == "AVAILABLE" and
              policy.get("authentication") == "ON_INSTALL",
@@ -530,8 +531,8 @@ def _(tmp: str) -> list[str]:
              claude_source.get("source") == "url" and
              claude_source.get("url") ==
              "https://github.com/jjudop11/pipa-guard-public.git" and
-             claude_source.get("ref") == "v0.1.0",
-             "Claude 마켓플레이스가 HTTPS public Git 저장소 v0.1.0을 가리키지 않는다")
+             claude_source.get("ref") == expected_ref,
+             "Claude 마켓플레이스 태그가 매니페스트 버전과 다르다")
 
     hooks = hook_config.get("hooks") if isinstance(hook_config, dict) else None
     want(problems, isinstance(hooks, dict), "번들 hooks 객체가 없다")

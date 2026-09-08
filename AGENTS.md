@@ -5,9 +5,10 @@
 
 ## 이 프로젝트가 무엇인가
 
-개인정보 보호 관련 한국 법령·고시를 **코드가 작성되는 순간에** 강제하는 에디터 훅 플러그인이다.
-리뷰 단계에서 지적하지 않는다. 위반 코드가 디스크에 닿기 전에 차단하고, 차단 이유로 조항
-원문을 돌려주어 에이전트가 스스로 적법한 코드로 다시 쓰게 만든다.
+개인정보 보호 관련 한국 법령·고시를 **지원하는 코드 편집 도구가 실행되는 순간에** 적용하는
+에디터 훅 플러그인이다. Claude Code의 `Write`·`Edit`와 Codex의 `apply_patch`에서 high 위반을
+디스크 기록 전에 차단하고, 차단 이유로 조항 원문과 수정 방향을 돌려준다. Bash 등 다른 파일
+쓰기 경로와 모델의 구체적인 재작성 결과는 보장 범위가 아니다.
 
 사용자 소개용 설명은 `README.md`에 있다. 이 파일은 **작업 규약**만 담는다.
 
@@ -16,17 +17,19 @@
 ```bash
 python3 tests/run_fixtures.py     # 판정.        종료코드 0 = 전체 통과. 현재 163/163.
 python3 tests/run_hooks.py        # 입출력·패키지 계약. 종료코드 0 = 전체 통과. 현재 33/33.
+python3 tests/run_claims.py       # README·배포 주장. 종료코드 0 = 전체 통과. 현재 10/10.
 python3 bin/pipa_check.py .       # 자기 검사.    차단 0 / 경고 0. exclude 회귀 방어.
 ```
 
-이 세 명령이 이 프로젝트의 상태를 기계가 읽을 수 있게 표현한 것이고, CI가 도는 것과 같다.
+이 네 명령이 이 프로젝트의 상태를 기계가 읽을 수 있게 표현한 것이고, CI가 도는 것과 같다.
 문서와 harness가 어긋나면 **harness가 옳다.** 문서를 고쳐라.
 
-앞의 두 harness는 보는 계층이 다르다. `run_fixtures.py`는 `analyze()`를 직접 불러 **무엇을
+앞의 세 harness는 보는 계층이 다르다. `run_fixtures.py`는 `analyze()`를 직접 불러 **무엇을
 검출하는가**를, `run_hooks.py`는 엔진을 하위 프로세스로 실행해 **어떻게 내보내는가**(stdout
-JSON·종료코드·실패 신호)와 Codex 프로젝트 훅·플러그인 패키지 연결을 고정한다. 한쪽만 통과해도
-깨진 상태다. (D-16, D-35, D-36)
-세 번째는 저장소 자신을 훑어 `.pipa.json`의 `exclude`가 fixture를 계속 제외하는지 본다.
+JSON·종료코드·실패 신호)와 Codex 프로젝트 훅·플러그인 패키지 연결을 고정한다. `run_claims.py`는
+README 수치·예제·지원 경계와 설정·비식별화·결정성·무의존성 주장을 실제 구현에 연결한다. 하나라도
+통과하지 않으면 깨진 상태다. (D-16, D-35, D-36, D-39)
+네 번째는 저장소 자신을 훑어 `.pipa.json`의 `exclude`가 fixture를 계속 제외하는지 본다.
 
 ## 절대 규칙
 
@@ -91,11 +94,12 @@ fixtures/violation/          검출되어야 하는 코드. 헤더에 // pipa-fi
 fixtures/compliant/          검출되면 안 되는 코드. 오탐 방어선.
 tests/run_fixtures.py        판정 harness. 재현율 100% / 오탐 0 을 확인한다.
 tests/run_hooks.py           계약 harness. 훅 stdin/stdout·CLI 종료코드·Codex 패키지를 고정한다.
+tests/run_claims.py          README 수치·예제·지원 경계와 설정·안전성·배포 주장을 고정한다.
 tests/benchmark_hooks.py     합성 입력 훅 성능 기준선. CI 합격 조건이 아니라 전후 비교용이다.
 skills/pipa-review/SKILL.md  변경분 전체를 활성 규칙·조항 원문과 대응해 리뷰한다.
 skills/pipa-flow-map/SKILL.md  코드·설정 증거를 구분해 개인정보 흐름도와 공백 표를 만든다.
 agents/pipa-auditor.md       두 스킬과 엔진 판정을 조정하는 읽기 전용 감사 에이전트다.
-.github/workflows/fixtures.yml  push·PR마다 위 세 명령. 3단계는 종료코드별로 진단한다.
+.github/workflows/fixtures.yml  push·PR마다 위 네 명령. 자기 검사는 종료코드별로 진단한다.
 .pipa.json                   이 저장소 자신의 설정. fixtures/ 를 제외해 자기 차단을 막는다.
 .pipa.json.example           사용자용 템플릿. 각 키의 법적 근거를 주석으로 달아 두었다.
 docs/DECISIONS.md            확정된 판단과 근거. append-only. 뒤집을 때는 지우지 말고 추가한다.
