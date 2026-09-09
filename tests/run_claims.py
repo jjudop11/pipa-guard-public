@@ -129,6 +129,18 @@ def _() -> list[str]:
         "에이전트가 스스로 적법한 코드로 다시 쓰게 만든다",
     ):
         want(problems, overclaim not in readme, "README에 무조건적 표현이 남아 있다: %s" % overclaim)
+    # 초보자 안내를 접힌 기술 자료보다 먼저 제공하고, 공개 설치와 보안 설정의 경계를 지킨다.
+    beginner = readme.split("<details>", 1)[0]
+    for marker in (
+        "## 준비물", "## 설치하기", "## 작동 확인하기", "## 프로젝트 설정",
+        "## 어디까지 보호하나요?", "## 문제가 생겼다면",
+        "claude plugin install pipa-guard@pipa-guard-public --scope user",
+        "codex plugin add pipa-guard@pipa-guard-public",
+        "실제 프로젝트가 아닌 비어 있는 연습 폴더",
+        "설치와 훅 신뢰 승인은 별개", "기존 설정이 있는 프로젝트",
+        "임의로 지정하면 안 됩니다",
+    ):
+        want(problems, marker in beginner, "README 시작 안내의 안전 경계 누락: %s" % marker)
     return problems
 
 
@@ -156,6 +168,17 @@ def _() -> list[str]:
             os.path.join(ROOT, "README_Ignored.java"), ignored[0], merged_config(),
         )
         want(problems, not findings, "README의 이유 있는 억제 예제가 실제로 억제되지 않는다")
+
+    # 대화창에 복사하는 합성 예제도 실제 엔진으로 검증한다. AI가 요청을 그대로 실행하는지와
+    # 설치된 호스트가 훅을 호출하는지는 별도의 수동 검증이지 이 테스트의 보장이 아니다.
+    demo = re.search(r"```text\n.*?\n(class GuardDemo \{.*?\n\})\n```", readme, re.DOTALL)
+    want(problems, demo is not None, "README 작동 확인용 합성 코드를 찾을 수 없다")
+    if demo:
+        findings = finding_confidences(
+            os.path.join(ROOT, "GuardDemo.java"), demo.group(1), merged_config(),
+        )
+        want(problems, findings.get("K-ENC-002/two-way") == "high",
+             "README 작동 확인 예제가 high로 검출되지 않는다")
 
     json_blocks = re.findall(r"```json\n(.*?)```", readme, re.DOTALL)
     want(problems, len(json_blocks) == 1, "README의 .pipa.json 예제를 하나로 식별할 수 없다")
