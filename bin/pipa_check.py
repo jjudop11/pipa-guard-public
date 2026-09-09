@@ -329,6 +329,8 @@ def collect_ignores(text: str, code: str) -> dict[int, set[str]]:
 class Statement:
     line: int
     text: str  # 공백이 정규화된 한 줄
+    offset: int = 0
+    end_offset: int = 0
 
 
 @dataclass
@@ -395,37 +397,42 @@ def split_statements(code: str, line_map: list[int]) -> list[Statement]:
     결과적으로 `@Convert(...) @Column(...) private String password` 처럼
     어노테이션과 필드 선언을 한 문장으로 함께 볼 수 있다.
     """
-    pieces: list[tuple[int, str]] = []
+    pieces: list[tuple[int, str, int, int]] = []
     seg_start = 0
     bounds = [i for i, ch in enumerate(code) if ch in ";{}\n"] + [len(code)]
     for i in bounds:
         seg = code[seg_start:i]
         if seg.strip():
             offset = len(seg) - len(seg.lstrip())
-            pieces.append((line_map[seg_start + offset], " ".join(seg.split())))
+            pieces.append((line_map[seg_start + offset], " ".join(seg.split()), seg_start + offset, i))
         seg_start = i + 1
 
     out: list[Statement] = []
     buf: list[str] = []
     buf_line = 0
-    for line, text in pieces:
+    buf_offset = 0
+    end_offset = 0
+    for line, text, offset, end_offset in pieces:
         # Java·Kotlin fluent API가 이전 호출을 닫은 뒤 다음 줄을 `.uri(...)`처럼 점으로
         # 시작하는 경우다. 앞 조각은 괄호가 닫혀 있어 이미 out에 들어갔을 수 있으므로
         # 다시 꺼내 하나의 호출 체인으로 합친다.
         if not buf and text.lstrip().startswith(".") and out:
             previous = out.pop()
             buf_line = previous.line
+            buf_offset = previous.offset
             buf.append(previous.text)
         if not buf:
             buf_line = line
+            buf_offset = offset
         buf.append(text)
         joined = " ".join(buf)
         if len(buf) < MAX_MERGE and _needs_continuation(joined):
             continue
-        out.append(Statement(line=buf_line, text=joined))
+        out.append(Statement(line=buf_line, text=joined, offset=buf_offset, end_offset=end_offset))
         buf = []
     if buf:
-        out.append(Statement(line=buf_line, text=" ".join(buf)))
+        out.append(Statement(line=buf_line, text=" ".join(buf),
+                             offset=buf_offset, end_offset=end_offset))
     return out
 
 
@@ -878,6 +885,15 @@ def _method_name(text: str) -> str | None:
     if not m:
         m = METHOD_DECL_RE.match(ANNOTATION_RE.sub(" ", text))
     if not m:
+        # Java의 package-private 메서드도 반환형과 이름이 있는 선언이다.
+        # return/new/throw 표현식과 대입·점 호출을 선언으로 오인하지 않는다.
+        clean = ANNOTATION_RE.sub(" ", text).strip()
+        m = re.match(
+            r"^(?!(?:return|throw|new|class|interface|enum|record|object|package|import)\b)"
+            r"(?:[\w$]+(?:\.[\w$]+)*"
+            r"(?:<[^;=()]+>)?(?:\[\])*)\s+([A-Za-z_$][\w$]*)\s*\(", clean,
+        )
+    if not m:
         return None
     name = m.group(1)
     if name in NOT_METHOD_NAMES:
@@ -894,13 +910,45 @@ def _alg_const_kind(rhs: str):
     return None, None
 
 
-def _crypto_receivers(src: Source) -> dict[str, tuple[str, str, int]]:
-    """알고리즘 객체를 담은 변수를 찾아 종류를 표시한다. -> {식별자: (종류, 표시명, 결정행)}
+def _crypto_method_scopes(src: Source) -> list[str]:
+    """메서드의 실제 중괄호 범위를 사용한다. 같은 줄 선언과 닫힌 메서드도 구별한다."""
+    clean = STRING_LITERAL_RE.sub(lambda m: " " * len(m.group(0)), src.code)
+    stack: list[int] = []
+    ends: dict[int, int] = {}
+    for offset, char in enumerate(clean):
+        if char == "{":
+            stack.append(offset)
+        elif char == "}" and stack:
+            ends[stack.pop()] = offset
+    for offset in stack:
+        ends[offset] = len(clean)
+
+    active: list[tuple[str, int]] = []
+    scopes: list[str] = []
+    for index, st in enumerate(src.statements):
+        while active and st.offset > active[-1][1]:
+            active.pop()
+        name = _method_name(st.text)
+        if name is not None:
+            scope = "%s@%d" % (normalize_ident(name), index)
+            opening = st.end_offset
+            while opening < len(clean) and clean[opening].isspace():
+                opening += 1
+            if opening in ends:
+                active.append((scope, ends[opening]))
+            scopes.append(scope)
+        else:
+            scopes.append(active[-1][0] if active else "<file>")
+    return scopes
+
+
+def _crypto_receivers(src: Source) -> list[dict]:
+    """문장 직전의 암호 객체·지역값과 로컬 보조 호출 정보를 문장별로 돌려준다.
 
     `MessageDigest digest = MessageDigest.getInstance("SHA-1");` 처럼 알고리즘 선택은
     한 문장에서 하고, 그 객체를 개인정보에 적용하는 것은 다른 문장에서 한다. 문장 하나만
     보면 어느 쪽도 위반으로 보이지 않는다. 알고리즘을 담은 변수를 표시해 두어야 적용
-    문장에서 판정할 수 있다. 파일 범위의 얕은 값 전파다.
+    문장에서 판정할 수 있다. 상수는 파일 범위, 지역값은 메서드 범위의 얕은 전파다.
 
     실제 생성 코드는 여기에 두 겹의 간접 참조를 더 얹는다. (V008)
 
@@ -923,46 +971,98 @@ def _crypto_receivers(src: Source) -> dict[str, tuple[str, str, int]]:
     무관한 문장을 물들이지 않는다. `C013`(SHA-1 체크섬 팩토리와 BCrypt 비밀번호가 한
     클래스에 공존)과 `C012`(같은 구조인데 상수가 PBKDF2)가 그 방어선이다.
     """
+    # 지역 변수는 메서드별로 분리한다. 보조 메서드는 반환값에 도달한 인자 자리까지
+    # 요약한다. 이름이 같은 선언은 타입 해석 없이 선택하지 않는다. (D-41)
+    scopes = _crypto_method_scopes(src)
+    declarations: dict[str, list[tuple[str, list[str]]]] = {}
+    for index, st in enumerate(src.statements):
+        name = _method_name(st.text)
+        if name is None:
+            continue
+        match = re.search(r"\b" + re.escape(name) + r"\s*\(", st.text)
+        args = _call_arguments_at(st.text, match.end() - 1) if match else None
+        params = []
+        for arg in args or []:
+            part = arg.split(":", 1)[0] if src.is_kotlin else arg
+            idents = IDENT_RE.findall(ANNOTATION_RE.sub(" ", part))
+            params.append(normalize_ident(idents[-1]) if idents else "")
+        declarations.setdefault(normalize_ident(name), []).append((scopes[index], params))
+
+    # 값은 종류·표시명·결정행이다. 입력 의존은 별도 표로 알고리즘 객체와 결과를 구별한다.
+    factories: dict[str, tuple[tuple[str, str, int], frozenset[int] | None]] = {}
+    views: list[dict] = []
     alg_consts: dict[str, tuple[str, str]] = {}
-    factories: dict[str, tuple[str, str, int]] = {}
     receivers: dict[str, tuple[str, str, int]] = {}
+    dependencies: dict[str, frozenset[str] | None] = {}
+
+    def inputs(expr: str) -> frozenset[str]:
+        result: set[str] = set()
+        for ident in IDENT_RE.findall(STRING_LITERAL_RE.sub(" ", expr)):
+            norm = normalize_ident(ident)
+            inherited = dependencies.get(norm)
+            result.update(inherited if inherited is not None else [norm])
+        return frozenset(result)
 
     def classify(expr: str):
-        """식이 알고리즘 객체를 만들어 내는지 본다. -> (종류, 표시명)"""
+        """종류·표시명·입력 의존을 돌려준다. 의존 None은 알고리즘 객체다."""
         for pattern, kind, label in RECEIVER_BINDINGS:
             if re.search(pattern, expr):
-                return kind, label
+                return kind, label, None
 
         # getInstance(ALGORITHM) — 인자가 표시된 상수인 경우
         for m in GET_INSTANCE_ARG_RE.finditer(expr):
             arg = normalize_ident(m.group(1).split(".")[-1])
             if arg in alg_consts:
-                return alg_consts[arg]
+                return *alg_consts[arg], None
 
         # newDigest() — 표시된 팩토리 메서드 호출
-        for m in CALL_NAME_RE.finditer(expr):
-            name = normalize_ident(m.group(1))
+        for name, args in _local_crypto_calls(expr):
             if name in factories:
-                kind, label, _line = factories[name]
-                return kind, label
+                (kind, label, _line), positions = factories[name]
+                if positions is None:
+                    return kind, label, None
+                if len(args) == len(declarations[name][0][1]):
+                    reached = frozenset().union(*(inputs(args[i]) for i in positions))
+                    return kind, label, reached
 
         # md.digest(...) — 표시된 변수를 실제로 값 처리에 쓰는 경우.
         # 판정 규칙은 적용 문장과 같아야 하므로 _receiver_hit을 그대로 쓴다.
         kind, label, _line = _receiver_hit(expr, receivers)
         if kind is not None:
-            return kind, label
+            return kind, label, inputs(expr)
 
         crypto_label, _ = _first(TWO_WAY_CRYPTO, expr)
         if crypto_label:
-            return "two_way", crypto_label
-        return None, None
+            is_apply = re.search(r"\.\s*(?:doFinal|encrypt|decrypt)\s*\(", expr)
+            return "two_way", crypto_label, inputs(expr) if is_apply else None
+        # 지역 암호 결과의 직접 반환·Base64 포장은 그대로 전달한다. length() 같은
+        # 무관한 가공을 암호 결과로 인정하지 않는다.
+        direct = re.fullmatch(r"\s*([A-Za-z_$][\w$]*)\s*", expr)
+        wrapped = _any([pattern for pattern, _label in BASE64_ENCODE], expr)
+        if direct or wrapped:
+            for ident in IDENT_RE.findall(STRING_LITERAL_RE.sub(" ", expr)):
+                norm = normalize_ident(ident)
+                if norm in receivers:
+                    kind, label, _line = receivers[norm]
+                    return kind, label, dependencies.get(norm)
+        return None, None, None
 
     for _round in range(PROPAGATION_ROUNDS):
-        current_method: str | None = None
-        for st in src.statements:
-            name = _method_name(st.text)
-            if name is not None:
-                current_method = normalize_ident(name)
+        constants_by_scope: dict[str, dict] = {}
+        receivers_by_scope: dict[str, dict] = {}
+        inputs_by_scope: dict[str, dict] = {}
+        views = []
+        for index, st in enumerate(src.statements):
+            scope = scopes[index]
+            alg_consts = dict(constants_by_scope.get("<file>", {}))
+            alg_consts.update(constants_by_scope.setdefault(scope, {}))
+            receivers = receivers_by_scope.setdefault(scope, {})
+            dependencies = inputs_by_scope.setdefault(scope, {})
+            view = dict(receivers)
+            for name, (binding, positions) in factories.items():
+                if positions is not None:
+                    view["@call:" + name] = (binding, positions, len(declarations[name][0][1]))
+            views.append(view)
 
             assign = ASSIGN_RE.search(st.text)
             if assign:
@@ -970,35 +1070,46 @@ def _crypto_receivers(src: Source) -> dict[str, tuple[str, str, int]]:
 
                 const_kind, const_label = _alg_const_kind(rhs)
                 if const_kind is not None:
+                    constants_by_scope[scope][normalize_ident(target)] = (const_kind, const_label)
                     alg_consts[normalize_ident(target)] = (const_kind, const_label)
 
-                kind, label = classify(rhs)
+                kind, label, reached = classify(rhs)
                 if kind is not None:
                     receivers[normalize_ident(target)] = (kind, label, st.line)
+                    dependencies[normalize_ident(target)] = reached
+                else:
+                    receivers.pop(normalize_ident(target), None)
+                    dependencies[normalize_ident(target)] = inputs(rhs)
 
             ret = RETURN_RE.match(st.text)
-            if ret and current_method is not None:
-                kind, label = classify(ret.group(1))
-                # 암호 결과를 Base64 문자열 등으로 감싸 반환하는 보조 메서드도 같은
-                # 양방향 흐름이다. 이름(encrypt*)이 아니라 이 메서드 안에서 실제 암호
-                # API가 만든 지역값이 반환식에 도달했다는 증거만 따른다. (V071, C094)
-                if kind is None:
-                    for match in IDENT_RE.finditer(ret.group(1)):
-                        inherited = receivers.get(normalize_ident(match.group(0)))
-                        if inherited is not None:
-                            kind, label, _origin_line = inherited
-                            break
+            if ret:
+                kind, label, reached = classify(ret.group(1))
                 if kind is not None:
-                    factories.setdefault(current_method, (kind, label, st.line))
+                    for name, decls in declarations.items():
+                        if len(decls) == 1 and decls[0][0] == scope:
+                            positions = (None if reached is None else frozenset(
+                                i for i, param in enumerate(decls[0][1]) if param in reached
+                            ))
+                            factories[name] = ((kind, label, st.line), positions)
+    return views
 
-    # rule_password_one_way가 `this.password = encrypt(rawPassword)`처럼 보조 메서드
-    # 호출 자체를 적용 지점으로 판정할 수 있게, 일반 수신자와 충돌하지 않는 키로 싣는다.
-    for name, value in factories.items():
-        receivers["@call:" + name] = value
-    return receivers
+
+def _local_crypto_calls(text: str):
+    """bare/this 호출만 로컬 선언과 연결한다. 다른 객체의 동명 메서드는 추정하지 않는다."""
+    clean = STRING_LITERAL_RE.sub(lambda m: " " * len(m.group(0)), text)
+    declared = _method_name(text)
+    for match in CALL_NAME_RE.finditer(clean):
+        if match.group(1) == declared:
+            continue
+        before = clean[:match.start()].rstrip()
+        if before.endswith(".") and not re.search(r"\bthis\s*\.\s*$", before):
+            continue
+        args = _call_arguments_at(text, match.end() - 1)
+        if args is not None:
+            yield normalize_ident(match.group(1)), args
 
 
-def _receiver_hit(statement: str, receivers: dict[str, tuple[str, str, int]]):
+def _receiver_hit(statement: str, receivers: dict, auth_idents: set[str] | None = None):
     """문장이 표시된 알고리즘 변수를 사용하는지 본다. -> (종류, 표시명, 결정행)"""
     if not receivers:
         return None, None, 0
@@ -1012,15 +1123,17 @@ def _receiver_hit(statement: str, receivers: dict[str, tuple[str, str, int]]):
 
     # 양방향 암호 API가 만든 값을 반환한다고 확인된 보조 메서드 호출. 메서드 선언
     # 자체는 호출이 아니므로 같은 이름을 제외한다.
-    declared = _method_name(statement)
-    declared_norm = normalize_ident(declared) if declared is not None else None
-    for match in CALL_NAME_RE.finditer(statement):
-        name = normalize_ident(match.group(1))
-        if name == declared_norm:
-            continue
+    for name, args in _local_crypto_calls(statement):
         marker = receivers.get("@call:" + name)
         if marker is not None:
-            return marker
+            binding, positions, arity = marker
+            if len(args) != arity:
+                continue
+            for position in positions:
+                idents = {normalize_ident(ident) for ident in IDENT_RE.findall(
+                    STRING_LITERAL_RE.sub(" ", args[position]))}
+                if auth_idents is not None and idents & auth_idents:
+                    return binding
     return None, None, 0
 
 
@@ -2780,12 +2893,12 @@ def rule_article7_internet_transmission(src: Source, dic: Dictionary) -> list[Fi
 
 def rule_password_one_way(src: Source, dic: Dictionary) -> list[Finding]:
     findings: list[Finding] = []
-    file_has_safe = _any(SAFE_ONE_WAY, src.code)
+    file_has_safe = _any(SAFE_ONE_WAY, STRING_LITERAL_RE.sub(" ", src.code))
     config_idents = _config_credential_idents(src, dic)
     receivers = _crypto_receivers(src)
     strong_hash_stmts: list[tuple[Statement, str]] = []
 
-    for st in src.statements:
+    for index, st in enumerate(src.statements):
         hits = _auth_hits(st.text, dic)
         if not hits:
             continue
@@ -2802,16 +2915,25 @@ def rule_password_one_way(src: Source, dic: Dictionary) -> list[Finding]:
         label = item.get("label", "인증정보")
         evidence = redact(st.text)
 
-        stmt_safe = _any(SAFE_ONE_WAY, st.text)
+        # 알고리즘 이름을 담은 리터럴은 보호 연산이 아니다. 암호 선택 리터럴은 위반
+        # 판정에 계속 필요하므로 안전성 신호를 확인하는 경로에서만 제거한다.
+        stmt_safe = _any(SAFE_ONE_WAY, STRING_LITERAL_RE.sub(" ", st.text))
 
         crypto_label, _ = _first(TWO_WAY_CRYPTO, st.text)
         hash_label, _ = _first(WEAK_HASH, st.text)
-        strong_in_stmt = _any(STRONG_HASH, st.text)
+        # getInstance("SHA-256") 같은 실제 알고리즘 선택은 남기되, 단독 "PBKDF2"
+        # 리터럴 때문에 보조 메서드 전파 검사를 건너뛰지 않는다.
+        strong_in_stmt = (
+            _any(STRONG_HASH, STRING_LITERAL_RE.sub(" ", st.text))
+            or _any([pattern for pattern in STRONG_HASH if "getInstance" in pattern], st.text)
+        )
 
         # 알고리즘이 이 문장에 없으면 앞에서 표시해 둔 변수를 통해 전파를 확인한다.
         prop_kind, prop_label, prop_line = (None, None, 0)
         if not crypto_label and not hash_label and not strong_in_stmt:
-            prop_kind, prop_label, prop_line = _receiver_hit(st.text, receivers)
+            prop_kind, prop_label, prop_line = _receiver_hit(
+                st.text, receivers[index], {normalize_ident(hit[0]) for hit in hits},
+            )
             if prop_kind == "two_way":
                 crypto_label = prop_label
             elif prop_kind == "weak_hash":

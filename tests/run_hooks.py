@@ -263,6 +263,80 @@ def _(tmp: str) -> list[str]:
     return problems
 
 
+def crypto_boundary_contract(
+    tmp: str, kind: str, names: list[str], safe_marker: str | None = None,
+) -> list[str]:
+    """D-41 경계를 Write·Edit·apply_patch의 실제 엔진 입출력에 고정한다."""
+    problems: list[str] = []
+    for name in names:
+        content = fixture(kind, name)
+        if safe_marker is not None:
+            content = content.replace('"BCrypt"', json.dumps(safe_marker))
+        path = os.path.join(tmp, name)
+        before = "// 합성 편집 전 파일\n"
+        with open(path, "w", encoding="utf-8") as fp:
+            fp.write(before)
+        patch = "*** Begin Patch\n*** Add File: new/" + name + "\n"
+        patch += "".join("+" + line + "\n" for line in content.splitlines())
+        patch += "*** End Patch\n"
+        payloads = [
+            event("PreToolUse", "Write", file_path=path, content=content),
+            event("PreToolUse", "Edit", file_path=path, old_string=before, new_string=content),
+            codex_event("PreToolUse", tmp, patch),
+        ]
+        for payload in payloads:
+            tool = json.loads(payload)["tool_name"]
+            code, out, err = engine([], payload)
+            label = "%s/%s/%s" % (name, tool, safe_marker or "원본")
+            want(problems, code == 0 and not err, label + " 종료코드·stderr 계약 실패")
+            if kind == "violation":
+                hso = hook_specific(problems, out, "PreToolUse")
+                want(problems, hso.get("permissionDecision") == "deny", label + " 차단 누락")
+                want(problems, "K-ENC-002/two-way" in hso.get("permissionDecisionReason", ""),
+                     label + " 차단 규칙 불일치")
+            else:
+                want(problems, out == "", label + " 적법 코드에 출력 발생")
+                # 경고로 낮춰 오탐을 숨기지 않는다. 적용 후 경고도 없어야 한다.
+                post = json.loads(payload)
+                post["hook_event_name"] = "PostToolUse"
+                with open(path, "w", encoding="utf-8") as fp:
+                    fp.write(content)
+                if tool == "apply_patch":
+                    os.makedirs(os.path.join(tmp, "new"), exist_ok=True)
+                    with open(os.path.join(tmp, "new", name), "w", encoding="utf-8") as fp:
+                        fp.write(content)
+                code, out, err = engine([], json.dumps(post))
+                want(problems, code == 0 and not out and not err, label + " 적용 후 오탐")
+                with open(path, "w", encoding="utf-8") as fp:
+                    fp.write(before)
+    return problems
+
+
+@case("암호 보조 메서드 미검출 회귀 → Write·Edit·apply_patch deny")
+def _(tmp: str) -> list[str]:
+    problems = crypto_boundary_contract(tmp, "violation", [
+        "V072_CryptoSafeMarkerLiteral.java", "V073_CryptoPackagePrivate.java",
+        "V074_CryptoSelectedPasswordArgument.java", "V075_KotlinCryptoSafeMarker.kt",
+        "V076_CryptoNextLineBrace.java",
+    ])
+    # 다른 안전 알고리즘명 리터럴로 바꿔도 동일하게 차단해야 한다.
+    for marker in ("PasswordEncoder", "PasswordEncoderFactories", "Argon2", "SCrypt",
+                   "PBKDF2", "Pbkdf2"):
+        problems.extend(crypto_boundary_contract(
+            tmp, "violation", ["V072_CryptoSafeMarkerLiteral.java"], marker,
+        ))
+    return problems
+
+
+@case("암호 보조 메서드 오탐 회귀 → 세 도구의 차단·경고 없음")
+def _(tmp: str) -> list[str]:
+    return crypto_boundary_contract(tmp, "compliant", [
+        "C095_CryptoLocalScope.java", "C096_CryptoReceiverCollision.java",
+        "C097_CryptoUnrelatedArgument.java", "C098_CryptoUnusedPasswordArgument.java",
+        "C099_CryptoNextLineBraceScope.java",
+    ])
+
+
 @case("PreToolUse + medium → 출력 없음 (차단하지 않는다)")
 def _(tmp: str) -> list[str]:
     problems: list[str] = []

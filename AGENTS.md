@@ -15,8 +15,8 @@
 ## 첫 명령
 
 ```bash
-python3 tests/run_fixtures.py     # 판정.        종료코드 0 = 전체 통과. 현재 165/165.
-python3 tests/run_hooks.py        # 입출력·패키지 계약. 종료코드 0 = 전체 통과. 현재 34/34.
+python3 tests/run_fixtures.py     # 판정.        종료코드 0 = 전체 통과. 현재 175/175.
+python3 tests/run_hooks.py        # 입출력·패키지 계약. 종료코드 0 = 전체 통과. 현재 36/36.
 python3 tests/run_claims.py       # README·배포 주장. 종료코드 0 = 전체 통과. 현재 10/10.
 python3 bin/pipa_check.py .       # 자기 검사.    차단 0 / 경고 0. exclude 회귀 방어.
 ```
@@ -132,9 +132,10 @@ docs/PERFORMANCE.md          합성 입력 기준 훅 성능 측정 방법과 �
 규칙의 문서 등재를 검사한다. 근거 조항이 확정되지 않은 규칙은 `article: null`로 두고
 구현하지 않는다. 규칙 9 때문에 원문 인용 없이는 Finding을 만들 수 없다.
 
-**파일 범위 얕은 전파**가 두 곳에 있다. 문장 하나만 보면 판정할 수 없는 경우를 위한 것이다.
+**얕은 전파**가 두 곳에 있다. 문장 하나만 보면 판정할 수 없는 경우를 위한 것이다.
 - `_config_credential_idents()` — 설정 주입 크리덴셜 식별자를 표시해 대상에서 뺀다
-- `_crypto_receivers()` — 알고리즘을 담은 변수를 표시해 적용 문장에서 판정한다
+- `_crypto_receivers()` — 지역 암호값은 실제 메서드 중괄호 범위로 분리하고, 보조 메서드의
+  암호 결과에 도달한 인자 자리만 적용 문장과 연결한다. 파일 상수는 별도로 유지한다. (D-41)
 
 전파를 넓힐 때는 반드시 적법 fixture를 먼저 추가해서 새지 않는지 확인한다. `C011`이 그 예다.
 
