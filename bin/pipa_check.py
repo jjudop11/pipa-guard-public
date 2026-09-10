@@ -560,6 +560,14 @@ ALG_NAME_LITERAL = [
 
 # getInstance에 리터럴이 아니라 식별자가 넘어가는 형태. 그 식별자를 상수 표에서 찾는다.
 GET_INSTANCE_ARG_RE = re.compile(r"getInstance\s*\(\s*([A-Za-z_$][\w$.]*)\s*[),]")
+# 전파가 시작될 수 있는 기존 패턴의 합집합이다. 독립 별칭 목록을 만들지 않는다.
+CRYPTO_SEED_RE = re.compile("|".join(
+    "(?:%s)" % pattern for pattern in (
+        [pattern for pattern, _kind, _label in RECEIVER_BINDINGS]
+        + [pattern for pattern, _label in TWO_WAY_CRYPTO]
+        + [GET_INSTANCE_ARG_RE.pattern]
+    )
+))
 # 문장 안의 호출 이름. 표시된 팩토리 메서드를 호출하는지 본다.
 CALL_NAME_RE = re.compile(r"\b([A-Za-z_$][\w$]*)\s*\(")
 RETURN_RE = re.compile(r"^\s*return\b(.*)$")
@@ -973,13 +981,18 @@ def _crypto_receivers(src: Source) -> list[dict]:
     """
     # 지역 변수는 메서드별로 분리한다. 보조 메서드는 반환값에 도달한 인자 자리까지
     # 요약한다. 이름이 같은 선언은 타입 해석 없이 선택하지 않는다. (D-41)
+    # 최초 암호 표식이 없으면 상수·지역값·팩토리 어디에서도 전파를 시작할 수 없다.
+    # 정규식은 실제 판정과 같은 정규화된 구문을 보며 문자열 선택자도 보존한다.
+    if not CRYPTO_SEED_RE.search("\n".join(st.text for st in src.statements)):
+        return [{} for _ in src.statements]
     scopes = _crypto_method_scopes(src)
     declarations: dict[str, list[tuple[str, list[str]]]] = {}
     for index, st in enumerate(src.statements):
         name = _method_name(st.text)
         if name is None:
             continue
-        match = re.search(r"\b" + re.escape(name) + r"\s*\(", st.text)
+        # 메서드마다 다른 정규식을 컴파일하지 않고 동일한 호출 토큰 패턴을 재사용한다.
+        match = next((m for m in CALL_NAME_RE.finditer(st.text) if m.group(1) == name), None)
         args = _call_arguments_at(st.text, match.end() - 1) if match else None
         params = []
         for arg in args or []:
@@ -994,29 +1007,51 @@ def _crypto_receivers(src: Source) -> list[dict]:
     alg_consts: dict[str, tuple[str, str]] = {}
     receivers: dict[str, tuple[str, str, int]] = {}
     dependencies: dict[str, frozenset[str] | None] = {}
+    # 전파 상태와 무관한 구문 해석만 파일 안에서 재사용한다. factories·receivers와
+    # 입력 의존은 매 라운드·메서드 범위마다 다시 조회하므로 전파 순서는 바뀌지 않는다.
+    syntax_cache: dict[str, tuple] = {}
+
+    def syntax(expr: str):
+        if expr not in syntax_cache:
+            binding = next(((kind, label) for pattern, kind, label in RECEIVER_BINDINGS
+                            if re.search(pattern, expr)), (None, None))
+            instance_args = tuple(normalize_ident(m.group(1).split(".")[-1])
+                                  for m in GET_INSTANCE_ARG_RE.finditer(expr))
+            calls = tuple(_local_crypto_calls(expr))
+            crypto_label, _ = _first(TWO_WAY_CRYPTO, expr)
+            is_apply = bool(re.search(r"\.\s*(?:doFinal|encrypt|decrypt)\s*\(", expr))
+            direct = re.fullmatch(r"\s*([A-Za-z_$][\w$]*)\s*", expr)
+            wrapped = _any([pattern for pattern, _label in BASE64_ENCODE], expr)
+            idents = tuple(normalize_ident(ident) for ident in
+                           IDENT_RE.findall(STRING_LITERAL_RE.sub(" ", expr)))
+            receiver_use = bool(re.search(
+                r"\.\s*(?:digest|update|doFinal|encrypt|decrypt|generateSecret)\s*\(", expr,
+            ))
+            syntax_cache[expr] = (binding, instance_args, calls, crypto_label,
+                                  is_apply, bool(direct or wrapped), idents, receiver_use)
+        return syntax_cache[expr]
 
     def inputs(expr: str) -> frozenset[str]:
         result: set[str] = set()
-        for ident in IDENT_RE.findall(STRING_LITERAL_RE.sub(" ", expr)):
-            norm = normalize_ident(ident)
+        for norm in syntax(expr)[6]:
             inherited = dependencies.get(norm)
             result.update(inherited if inherited is not None else [norm])
         return frozenset(result)
 
     def classify(expr: str):
         """종류·표시명·입력 의존을 돌려준다. 의존 None은 알고리즘 객체다."""
-        for pattern, kind, label in RECEIVER_BINDINGS:
-            if re.search(pattern, expr):
-                return kind, label, None
+        (binding, instance_args, calls, crypto_label, is_apply,
+         direct_or_wrapped, idents, receiver_use) = syntax(expr)
+        if binding[0] is not None:
+            return *binding, None
 
         # getInstance(ALGORITHM) — 인자가 표시된 상수인 경우
-        for m in GET_INSTANCE_ARG_RE.finditer(expr):
-            arg = normalize_ident(m.group(1).split(".")[-1])
+        for arg in instance_args:
             if arg in alg_consts:
                 return *alg_consts[arg], None
 
         # newDigest() — 표시된 팩토리 메서드 호출
-        for name, args in _local_crypto_calls(expr):
+        for name, args in calls:
             if name in factories:
                 (kind, label, _line), positions = factories[name]
                 if positions is None:
@@ -1027,21 +1062,17 @@ def _crypto_receivers(src: Source) -> list[dict]:
 
         # md.digest(...) — 표시된 변수를 실제로 값 처리에 쓰는 경우.
         # 판정 규칙은 적용 문장과 같아야 하므로 _receiver_hit을 그대로 쓴다.
-        kind, label, _line = _receiver_hit(expr, receivers)
-        if kind is not None:
-            return kind, label, inputs(expr)
+        if receiver_use or calls:
+            kind, label, _line = _receiver_hit(expr, receivers)
+            if kind is not None:
+                return kind, label, inputs(expr)
 
-        crypto_label, _ = _first(TWO_WAY_CRYPTO, expr)
         if crypto_label:
-            is_apply = re.search(r"\.\s*(?:doFinal|encrypt|decrypt)\s*\(", expr)
             return "two_way", crypto_label, inputs(expr) if is_apply else None
         # 지역 암호 결과의 직접 반환·Base64 포장은 그대로 전달한다. length() 같은
         # 무관한 가공을 암호 결과로 인정하지 않는다.
-        direct = re.fullmatch(r"\s*([A-Za-z_$][\w$]*)\s*", expr)
-        wrapped = _any([pattern for pattern, _label in BASE64_ENCODE], expr)
-        if direct or wrapped:
-            for ident in IDENT_RE.findall(STRING_LITERAL_RE.sub(" ", expr)):
-                norm = normalize_ident(ident)
+        if direct_or_wrapped:
+            for norm in idents:
                 if norm in receivers:
                     kind, label, _line = receivers[norm]
                     return kind, label, dependencies.get(norm)
@@ -2895,7 +2926,9 @@ def rule_password_one_way(src: Source, dic: Dictionary) -> list[Finding]:
     findings: list[Finding] = []
     file_has_safe = _any(SAFE_ONE_WAY, STRING_LITERAL_RE.sub(" ", src.code))
     config_idents = _config_credential_idents(src, dic)
-    receivers = _crypto_receivers(src)
+    # 전파 결과가 필요한 인증정보 문장이 있을 때만 파일 전체를 분석한다.
+    # 선언 순서·지역 범위 판정은 그대로 유지하고, 같은 파일에서는 한 번만 계산한다.
+    receivers: list[dict] | None = None
     strong_hash_stmts: list[tuple[Statement, str]] = []
 
     for index, st in enumerate(src.statements):
@@ -2931,6 +2964,8 @@ def rule_password_one_way(src: Source, dic: Dictionary) -> list[Finding]:
         # 알고리즘이 이 문장에 없으면 앞에서 표시해 둔 변수를 통해 전파를 확인한다.
         prop_kind, prop_label, prop_line = (None, None, 0)
         if not crypto_label and not hash_label and not strong_in_stmt:
+            if receivers is None:
+                receivers = _crypto_receivers(src)
             prop_kind, prop_label, prop_line = _receiver_hit(
                 st.text, receivers[index], {normalize_ident(hit[0]) for hit in hits},
             )
