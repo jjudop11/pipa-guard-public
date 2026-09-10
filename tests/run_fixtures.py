@@ -27,6 +27,7 @@ import json
 import os
 import re
 import sys
+from unittest.mock import patch
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # 엔진을 고치면서 harness를 반복 실행하게 되므로 .pyc 를 남기지 않는다. 남은 바이트코드가
@@ -246,6 +247,44 @@ def check_dictionary(dic) -> list[str]:
     return problems
 
 
+def check_crypto_work(dic: pipa_check.Dictionary) -> list[str]:
+    """시간 임계값 대신 불필요한 전파 분석 횟수와 기존 판정 보존을 고정한다."""
+    problems: list[str] = []
+    original = pipa_check._crypto_receivers
+    for suffix, text in (
+        ("java", "class Plain { String trim(String value) { return value.trim(); } }"),
+        ("kt", "class Plain { fun trim(value: String): String = value.trim() }"),
+    ):
+        src = pipa_check.prepare("Plain." + suffix, text, {"exclude": []})
+        with patch.object(pipa_check, "_crypto_receivers", wraps=original) as calls:
+            findings = pipa_check.rule_password_one_way(src, dic)
+        if findings or calls.call_count:
+            problems.append("암호 전파 — 대상 없는 합성 %s에서 분석 실행 또는 오탐" % suffix)
+
+    src = pipa_check.prepare("Plain.java", "class Plain { String password; }", {"exclude": []})
+    with patch.object(pipa_check, "_crypto_method_scopes", wraps=pipa_check._crypto_method_scopes) as calls:
+        findings = pipa_check.rule_password_one_way(src, dic)
+    if findings or calls.call_count:
+        problems.append("암호 전파 — 암호 시작점 없는 필드 선언에서 범위 분석 실행 또는 오탐")
+
+    # 상수·뒤쪽 팩토리·D-41 경계는 파일 전체를 분석하되 한 번만 계산한다.
+    for kind, name in (
+        ("violation", "V008_PinSha1AlgorithmConstant.java"),
+        ("violation", "V072_CryptoSafeMarkerLiteral.java"),
+        ("compliant", "C095_CryptoLocalScope.java"),
+    ):
+        path = os.path.join(ROOT, "fixtures", kind, name)
+        src = pipa_check.prepare(path, load(path), {"exclude": []})
+        eager = original(src)
+        with patch.object(pipa_check, "_crypto_receivers", return_value=eager):
+            expected = pipa_check.rule_password_one_way(src, dic)
+        with patch.object(pipa_check, "_crypto_receivers", wraps=original) as calls:
+            actual = pipa_check.rule_password_one_way(src, dic)
+        if actual != expected or calls.call_count != 1:
+            problems.append("암호 전파 — %s 판정 또는 파일당 1회 계약 불일치" % name)
+    return problems
+
+
 def main() -> int:
     dic = pipa_check.load_dictionary()
     passed = 0
@@ -345,6 +384,16 @@ def main() -> int:
         failed.extend(registry_problems)
     else:
         print("  PASS 엔진·articles.md와 규칙 ID가 일치한다")
+
+    print()
+    print("=== 암호 전파 — 지연 계산·재사용 계약")
+    crypto_problems = check_crypto_work(dic)
+    if crypto_problems:
+        for line in crypto_problems:
+            print("  FAIL %s" % line)
+        failed.extend(crypto_problems)
+    else:
+        print("  PASS 대상 없는 입력은 0회, 필요한 파일은 1회 분석하고 판정을 유지한다")
 
     total = len(files("violation")) + len(files("compliant"))
     print()

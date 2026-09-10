@@ -1,0 +1,1478 @@
+{
+  "baseline_public_commit": "eae6558893e6a83cf3738d51ab2a72fa631289e1",
+  "candidate_public_commit": "b9eae417ad8f033e29e34d36fd1fb7e05a10a2b7",
+  "baseline_engine_sha256": "92317fe3ca5dd81f389ed689e38372831080c7b4fe927d7f69126115cfaa6128",
+  "candidate_engine_sha256": "9c0655ddbff680c10db92cb517e87014f70c48edc8f59cdb7be49f50909277fd",
+  "order": "before-after-after-before",
+  "note": "공개 커밋과 엔진이 같은 로컬 스냅샷을 사용했다. 각 회차의 중앙값·p95를 따로 보존하며 100개 표본을 합친 통계가 아니다.",
+  "runs": [
+    {
+      "round": 1,
+      "version": "before",
+      "metadata": {
+        "measured_at": "2026-09-10T20:31:49+0900",
+        "platform": "macOS-26.4.1-arm64-arm-64bit-Mach-O",
+        "machine": "arm64",
+        "python": "3.14.6",
+        "samples": 50,
+        "warmups": 5,
+        "large_lines": 2000,
+        "note": "모두 합성 fixture 또는 메모리 생성 합성 소스 기준"
+      },
+      "results": [
+        {
+          "name": "PreToolUse Write 적법 Java",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "기존 합성 fixture 27줄",
+          "median_ms": 37.975167,
+          "p95_ms": 39.627667,
+          "min_ms": 37.239292,
+          "max_ms": 40.651833
+        },
+        {
+          "name": "PostToolUse Write 적법 Java",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "기존 합성 fixture 27줄",
+          "median_ms": 37.973124999999996,
+          "p95_ms": 39.779625,
+          "min_ms": 36.90925,
+          "max_ms": 40.06925
+        },
+        {
+          "name": "PreToolUse Write 차단 Java",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "기존 합성 fixture 28줄",
+          "median_ms": 38.168542,
+          "p95_ms": 39.869834,
+          "min_ms": 37.185375,
+          "max_ms": 40.008292
+        },
+        {
+          "name": "PreToolUse Write 평문 HTTP 전송 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 23줄",
+          "median_ms": 38.4466875,
+          "p95_ms": 40.12825,
+          "min_ms": 37.671125,
+          "max_ms": 41.246333
+        },
+        {
+          "name": "PreToolUse Write 요청 DTO 평문 HTTP 전송 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 24줄",
+          "median_ms": 38.511770999999996,
+          "p95_ms": 39.713292,
+          "min_ms": 37.746,
+          "max_ms": 40.814708
+        },
+        {
+          "name": "PreToolUse Write Spring RestClient 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 22줄",
+          "median_ms": 38.7506875,
+          "p95_ms": 40.435833,
+          "min_ms": 37.943292,
+          "max_ms": 40.852417
+        },
+        {
+          "name": "PreToolUse Write OkHttp 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 27줄",
+          "median_ms": 39.1526255,
+          "p95_ms": 40.96425,
+          "min_ms": 38.16075,
+          "max_ms": 41.105292
+        },
+        {
+          "name": "PreToolUse Write Apache HttpClient 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 24줄",
+          "median_ms": 39.30416700000001,
+          "p95_ms": 41.200791,
+          "min_ms": 38.638208,
+          "max_ms": 47.672791
+        },
+        {
+          "name": "PreToolUse Write 일반 개인정보 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 22줄",
+          "median_ms": 38.351542,
+          "p95_ms": 39.91325,
+          "min_ms": 37.709833,
+          "max_ms": 40.612875
+        },
+        {
+          "name": "PreToolUse Write Spring HTTP Service 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 28줄",
+          "median_ms": 39.867583499999995,
+          "p95_ms": 40.957291,
+          "min_ms": 39.10525,
+          "max_ms": 41.997167
+        },
+        {
+          "name": "PreToolUse Write Retrofit 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 25줄",
+          "median_ms": 39.1128955,
+          "p95_ms": 40.550041,
+          "min_ms": 38.41225,
+          "max_ms": 40.983542
+        },
+        {
+          "name": "PreToolUse Write Feign 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 26줄",
+          "median_ms": 39.546625,
+          "p95_ms": 40.825875,
+          "min_ms": 38.584917,
+          "max_ms": 41.798125
+        },
+        {
+          "name": "PreToolUse Write 서버 평문 HTTP 수신 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 17줄",
+          "median_ms": 37.263437499999995,
+          "p95_ms": 39.554,
+          "min_ms": 36.450708,
+          "max_ms": 40.512417
+        },
+        {
+          "name": "PreToolUse Write API 출력 정책 초과 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 21줄",
+          "median_ms": 37.7601665,
+          "p95_ms": 39.459,
+          "min_ms": 36.878209,
+          "max_ms": 40.618959
+        },
+        {
+          "name": "PreToolUse Write 접속기록 구성요소 누락 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 16줄",
+          "median_ms": 37.600187,
+          "p95_ms": 39.459209,
+          "min_ms": 36.992833,
+          "max_ms": 40.208
+        },
+        {
+          "name": "PreToolUse Write 적법 Kotlin",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "기존 합성 fixture 16줄",
+          "median_ms": 37.801625,
+          "p95_ms": 39.340083,
+          "min_ms": 36.893458,
+          "max_ms": 40.44925
+        },
+        {
+          "name": "PreToolUse Write 비이용자 내부망 평가 예외",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 19줄",
+          "median_ms": 37.3915415,
+          "p95_ms": 38.605916,
+          "min_ms": 36.787667,
+          "max_ms": 39.612
+        },
+        {
+          "name": "PreToolUse Edit 대형 Java",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "메모리 생성 합성 소스 2000줄",
+          "median_ms": 160.47825,
+          "p95_ms": 162.204125,
+          "min_ms": 158.833875,
+          "max_ms": 164.848958
+        },
+        {
+          "name": "PostToolUse Edit 대형 Java",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "메모리 생성 합성 소스 2000줄",
+          "median_ms": 161.221583,
+          "p95_ms": 163.545833,
+          "min_ms": 157.572083,
+          "max_ms": 166.0685
+        },
+        {
+          "name": "PreToolUse Write 대형 Kotlin",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "메모리 생성 합성 소스 2000줄",
+          "median_ms": 139.2210415,
+          "p95_ms": 140.971459,
+          "min_ms": 137.521084,
+          "max_ms": 142.881541
+        },
+        {
+          "name": "설정 탐색",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "프로젝트 루트에서 4단계 아래",
+          "median_ms": 0.0223125,
+          "p95_ms": 0.02725,
+          "min_ms": 0.021125,
+          "max_ms": 0.030541
+        },
+        {
+          "name": "항목 사전 로드",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "항목 12개 사전",
+          "median_ms": 0.0707915,
+          "p95_ms": 0.077791,
+          "min_ms": 0.067208,
+          "max_ms": 0.113167
+        },
+        {
+          "name": "analyze 적법 Java",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "기존 합성 fixture 27줄",
+          "median_ms": 0.7723125,
+          "p95_ms": 0.942875,
+          "min_ms": 0.75625,
+          "max_ms": 0.973292
+        },
+        {
+          "name": "analyze 차단 Java",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "기존 합성 fixture 28줄",
+          "median_ms": 0.790563,
+          "p95_ms": 0.889542,
+          "min_ms": 0.7415,
+          "max_ms": 0.94025
+        },
+        {
+          "name": "analyze 평문 HTTP 전송 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 23줄",
+          "median_ms": 1.045375,
+          "p95_ms": 1.14375,
+          "min_ms": 0.957291,
+          "max_ms": 1.253667
+        },
+        {
+          "name": "analyze 요청 DTO 평문 HTTP 전송 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 24줄",
+          "median_ms": 1.143938,
+          "p95_ms": 1.224916,
+          "min_ms": 1.061958,
+          "max_ms": 1.258208
+        },
+        {
+          "name": "analyze Spring RestClient 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 22줄",
+          "median_ms": 1.1323125,
+          "p95_ms": 1.196875,
+          "min_ms": 1.055042,
+          "max_ms": 1.3395
+        },
+        {
+          "name": "analyze OkHttp 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 27줄",
+          "median_ms": 1.6849375,
+          "p95_ms": 1.7795,
+          "min_ms": 1.551125,
+          "max_ms": 1.860625
+        },
+        {
+          "name": "analyze Apache HttpClient 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 24줄",
+          "median_ms": 1.9333125,
+          "p95_ms": 2.090417,
+          "min_ms": 1.789083,
+          "max_ms": 2.138709
+        },
+        {
+          "name": "analyze 일반 개인정보 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 22줄",
+          "median_ms": 0.885583,
+          "p95_ms": 0.971459,
+          "min_ms": 0.809959,
+          "max_ms": 1.023666
+        },
+        {
+          "name": "analyze Spring HTTP Service 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 28줄",
+          "median_ms": 1.9681045,
+          "p95_ms": 2.059083,
+          "min_ms": 1.851708,
+          "max_ms": 2.18225
+        },
+        {
+          "name": "analyze Retrofit 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 25줄",
+          "median_ms": 1.294625,
+          "p95_ms": 1.408208,
+          "min_ms": 1.201625,
+          "max_ms": 1.542709
+        },
+        {
+          "name": "analyze Feign 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 26줄",
+          "median_ms": 1.6126665,
+          "p95_ms": 1.702333,
+          "min_ms": 1.498833,
+          "max_ms": 1.798375
+        },
+        {
+          "name": "analyze 서버 평문 HTTP 수신 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 17줄",
+          "median_ms": 0.489063,
+          "p95_ms": 0.50825,
+          "min_ms": 0.452792,
+          "max_ms": 0.609333
+        },
+        {
+          "name": "analyze API 출력 정책 초과 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 21줄",
+          "median_ms": 0.6029374999999999,
+          "p95_ms": 0.686916,
+          "min_ms": 0.550209,
+          "max_ms": 0.721583
+        },
+        {
+          "name": "analyze 접속기록 구성요소 누락 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 16줄",
+          "median_ms": 0.4276045,
+          "p95_ms": 0.500292,
+          "min_ms": 0.393417,
+          "max_ms": 0.54
+        },
+        {
+          "name": "analyze 비이용자 내부망 평가 예외",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 19줄",
+          "median_ms": 0.37324999999999997,
+          "p95_ms": 0.394,
+          "min_ms": 0.368833,
+          "max_ms": 0.405958
+        },
+        {
+          "name": "analyze 대형 Java",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "메모리 생성 합성 소스 2000줄",
+          "median_ms": 123.25774999999999,
+          "p95_ms": 125.098375,
+          "min_ms": 121.010458,
+          "max_ms": 125.437834
+        },
+        {
+          "name": "analyze 대형 Kotlin",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "메모리 생성 합성 소스 2000줄",
+          "median_ms": 99.762646,
+          "p95_ms": 101.691417,
+          "min_ms": 98.309625,
+          "max_ms": 103.496125
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "version": "after",
+      "metadata": {
+        "measured_at": "2026-09-10T20:33:21+0900",
+        "platform": "macOS-26.4.1-arm64-arm-64bit-Mach-O",
+        "machine": "arm64",
+        "python": "3.14.6",
+        "samples": 50,
+        "warmups": 5,
+        "large_lines": 2000,
+        "note": "모두 합성 fixture 또는 메모리 생성 합성 소스 기준"
+      },
+      "results": [
+        {
+          "name": "PreToolUse Write 적법 Java",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "기존 합성 fixture 27줄",
+          "median_ms": 39.541833499999996,
+          "p95_ms": 40.504583,
+          "min_ms": 38.949375,
+          "max_ms": 41.275833
+        },
+        {
+          "name": "PostToolUse Write 적법 Java",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "기존 합성 fixture 27줄",
+          "median_ms": 39.662375,
+          "p95_ms": 40.98375,
+          "min_ms": 38.859917,
+          "max_ms": 41.453375
+        },
+        {
+          "name": "PreToolUse Write 차단 Java",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "기존 합성 fixture 28줄",
+          "median_ms": 39.8596875,
+          "p95_ms": 40.992958,
+          "min_ms": 38.808084,
+          "max_ms": 42.806167
+        },
+        {
+          "name": "PreToolUse Write 평문 HTTP 전송 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 23줄",
+          "median_ms": 40.284979500000006,
+          "p95_ms": 41.330458,
+          "min_ms": 39.355833,
+          "max_ms": 41.6005
+        },
+        {
+          "name": "PreToolUse Write 요청 DTO 평문 HTTP 전송 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 24줄",
+          "median_ms": 40.430042,
+          "p95_ms": 41.527834,
+          "min_ms": 39.613292,
+          "max_ms": 41.873375
+        },
+        {
+          "name": "PreToolUse Write Spring RestClient 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 22줄",
+          "median_ms": 40.2242085,
+          "p95_ms": 41.613791,
+          "min_ms": 39.303542,
+          "max_ms": 52.462291
+        },
+        {
+          "name": "PreToolUse Write OkHttp 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 27줄",
+          "median_ms": 41.092812499999994,
+          "p95_ms": 42.499208,
+          "min_ms": 40.177125,
+          "max_ms": 42.724875
+        },
+        {
+          "name": "PreToolUse Write Apache HttpClient 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 24줄",
+          "median_ms": 41.402103999999994,
+          "p95_ms": 43.331541,
+          "min_ms": 40.777042,
+          "max_ms": 43.899625
+        },
+        {
+          "name": "PreToolUse Write 일반 개인정보 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 22줄",
+          "median_ms": 40.1698125,
+          "p95_ms": 41.395,
+          "min_ms": 39.351166,
+          "max_ms": 41.846375
+        },
+        {
+          "name": "PreToolUse Write Spring HTTP Service 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 28줄",
+          "median_ms": 41.591792,
+          "p95_ms": 43.012708,
+          "min_ms": 41.025291,
+          "max_ms": 43.658958
+        },
+        {
+          "name": "PreToolUse Write Retrofit 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 25줄",
+          "median_ms": 40.9517295,
+          "p95_ms": 42.496041,
+          "min_ms": 40.134792,
+          "max_ms": 43.383542
+        },
+        {
+          "name": "PreToolUse Write Feign 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 26줄",
+          "median_ms": 41.2678335,
+          "p95_ms": 42.75725,
+          "min_ms": 40.668541,
+          "max_ms": 43.362792
+        },
+        {
+          "name": "PreToolUse Write 서버 평문 HTTP 수신 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 17줄",
+          "median_ms": 38.7982705,
+          "p95_ms": 40.107667,
+          "min_ms": 38.203375,
+          "max_ms": 40.947208
+        },
+        {
+          "name": "PreToolUse Write API 출력 정책 초과 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 21줄",
+          "median_ms": 39.385979,
+          "p95_ms": 40.431125,
+          "min_ms": 38.733208,
+          "max_ms": 41.972541
+        },
+        {
+          "name": "PreToolUse Write 접속기록 구성요소 누락 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 16줄",
+          "median_ms": 39.2248955,
+          "p95_ms": 40.356583,
+          "min_ms": 38.615333,
+          "max_ms": 41.683917
+        },
+        {
+          "name": "PreToolUse Write 적법 Kotlin",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "기존 합성 fixture 16줄",
+          "median_ms": 39.644333,
+          "p95_ms": 40.7215,
+          "min_ms": 38.666166,
+          "max_ms": 41.247667
+        },
+        {
+          "name": "PreToolUse Write 비이용자 내부망 평가 예외",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 19줄",
+          "median_ms": 39.063021,
+          "p95_ms": 40.346667,
+          "min_ms": 38.388417,
+          "max_ms": 41.073958
+        },
+        {
+          "name": "PreToolUse Edit 대형 Java",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "메모리 생성 합성 소스 2000줄",
+          "median_ms": 212.69689549999998,
+          "p95_ms": 215.413542,
+          "min_ms": 210.07725,
+          "max_ms": 216.999083
+        },
+        {
+          "name": "PostToolUse Edit 대형 Java",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "메모리 생성 합성 소스 2000줄",
+          "median_ms": 213.34141699999998,
+          "p95_ms": 215.71725,
+          "min_ms": 210.36725,
+          "max_ms": 216.498
+        },
+        {
+          "name": "PreToolUse Write 대형 Kotlin",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "메모리 생성 합성 소스 2000줄",
+          "median_ms": 196.04222950000002,
+          "p95_ms": 199.057958,
+          "min_ms": 191.490333,
+          "max_ms": 206.799125
+        },
+        {
+          "name": "설정 탐색",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "프로젝트 루트에서 4단계 아래",
+          "median_ms": 0.023667,
+          "p95_ms": 0.029667,
+          "min_ms": 0.021208,
+          "max_ms": 0.034291
+        },
+        {
+          "name": "항목 사전 로드",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "항목 12개 사전",
+          "median_ms": 0.074666,
+          "p95_ms": 0.085458,
+          "min_ms": 0.066833,
+          "max_ms": 0.089333
+        },
+        {
+          "name": "analyze 적법 Java",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "기존 합성 fixture 27줄",
+          "median_ms": 0.8861874999999999,
+          "p95_ms": 0.996834,
+          "min_ms": 0.81925,
+          "max_ms": 1.114459
+        },
+        {
+          "name": "analyze 차단 Java",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "기존 합성 fixture 28줄",
+          "median_ms": 0.8482704999999999,
+          "p95_ms": 0.92075,
+          "min_ms": 0.775417,
+          "max_ms": 0.977167
+        },
+        {
+          "name": "analyze 평문 HTTP 전송 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 23줄",
+          "median_ms": 1.106125,
+          "p95_ms": 1.221041,
+          "min_ms": 1.036667,
+          "max_ms": 1.323792
+        },
+        {
+          "name": "analyze 요청 DTO 평문 HTTP 전송 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 24줄",
+          "median_ms": 1.240375,
+          "p95_ms": 1.327541,
+          "min_ms": 1.136458,
+          "max_ms": 1.392833
+        },
+        {
+          "name": "analyze Spring RestClient 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 22줄",
+          "median_ms": 1.176396,
+          "p95_ms": 1.247208,
+          "min_ms": 1.100959,
+          "max_ms": 1.335875
+        },
+        {
+          "name": "analyze OkHttp 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 27줄",
+          "median_ms": 1.827729,
+          "p95_ms": 1.916417,
+          "min_ms": 1.712417,
+          "max_ms": 1.924292
+        },
+        {
+          "name": "analyze Apache HttpClient 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 24줄",
+          "median_ms": 2.066896,
+          "p95_ms": 2.1885,
+          "min_ms": 1.953125,
+          "max_ms": 2.22675
+        },
+        {
+          "name": "analyze 일반 개인정보 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 22줄",
+          "median_ms": 0.949458,
+          "p95_ms": 1.04675,
+          "min_ms": 0.899083,
+          "max_ms": 1.133375
+        },
+        {
+          "name": "analyze Spring HTTP Service 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 28줄",
+          "median_ms": 2.113375,
+          "p95_ms": 2.185083,
+          "min_ms": 2.004542,
+          "max_ms": 2.235291
+        },
+        {
+          "name": "analyze Retrofit 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 25줄",
+          "median_ms": 1.388979,
+          "p95_ms": 1.464542,
+          "min_ms": 1.30375,
+          "max_ms": 1.5745
+        },
+        {
+          "name": "analyze Feign 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 26줄",
+          "median_ms": 1.7245,
+          "p95_ms": 1.794334,
+          "min_ms": 1.622167,
+          "max_ms": 1.844917
+        },
+        {
+          "name": "analyze 서버 평문 HTTP 수신 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 17줄",
+          "median_ms": 0.514,
+          "p95_ms": 0.641208,
+          "min_ms": 0.492167,
+          "max_ms": 0.649958
+        },
+        {
+          "name": "analyze API 출력 정책 초과 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 21줄",
+          "median_ms": 0.634833,
+          "p95_ms": 0.672917,
+          "min_ms": 0.600625,
+          "max_ms": 0.768333
+        },
+        {
+          "name": "analyze 접속기록 구성요소 누락 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 16줄",
+          "median_ms": 0.5137915,
+          "p95_ms": 0.545708,
+          "min_ms": 0.469708,
+          "max_ms": 0.611167
+        },
+        {
+          "name": "analyze 비이용자 내부망 평가 예외",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 19줄",
+          "median_ms": 0.3987295,
+          "p95_ms": 0.439167,
+          "min_ms": 0.367709,
+          "max_ms": 0.566
+        },
+        {
+          "name": "analyze 대형 Java",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "메모리 생성 합성 소스 2000줄",
+          "median_ms": 175.11735399999998,
+          "p95_ms": 177.666875,
+          "min_ms": 172.886708,
+          "max_ms": 188.321292
+        },
+        {
+          "name": "analyze 대형 Kotlin",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "메모리 생성 합성 소스 2000줄",
+          "median_ms": 156.7170205,
+          "p95_ms": 158.696334,
+          "min_ms": 154.956709,
+          "max_ms": 159.237458
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "version": "after",
+      "metadata": {
+        "measured_at": "2026-09-10T20:34:53+0900",
+        "platform": "macOS-26.4.1-arm64-arm-64bit-Mach-O",
+        "machine": "arm64",
+        "python": "3.14.6",
+        "samples": 50,
+        "warmups": 5,
+        "large_lines": 2000,
+        "note": "모두 합성 fixture 또는 메모리 생성 합성 소스 기준"
+      },
+      "results": [
+        {
+          "name": "PreToolUse Write 적법 Java",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "기존 합성 fixture 27줄",
+          "median_ms": 40.367146,
+          "p95_ms": 41.619,
+          "min_ms": 39.732125,
+          "max_ms": 41.958041
+        },
+        {
+          "name": "PostToolUse Write 적법 Java",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "기존 합성 fixture 27줄",
+          "median_ms": 40.3703955,
+          "p95_ms": 41.707667,
+          "min_ms": 39.619625,
+          "max_ms": 42.318084
+        },
+        {
+          "name": "PreToolUse Write 차단 Java",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "기존 합성 fixture 28줄",
+          "median_ms": 40.3514375,
+          "p95_ms": 41.770875,
+          "min_ms": 39.846958,
+          "max_ms": 42.194666
+        },
+        {
+          "name": "PreToolUse Write 평문 HTTP 전송 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 23줄",
+          "median_ms": 40.919896,
+          "p95_ms": 42.785542,
+          "min_ms": 40.0255,
+          "max_ms": 43.417833
+        },
+        {
+          "name": "PreToolUse Write 요청 DTO 평문 HTTP 전송 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 24줄",
+          "median_ms": 40.9673125,
+          "p95_ms": 42.167791,
+          "min_ms": 40.255375,
+          "max_ms": 42.721208
+        },
+        {
+          "name": "PreToolUse Write Spring RestClient 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 22줄",
+          "median_ms": 40.8569165,
+          "p95_ms": 42.553,
+          "min_ms": 40.246875,
+          "max_ms": 42.624
+        },
+        {
+          "name": "PreToolUse Write OkHttp 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 27줄",
+          "median_ms": 41.643729,
+          "p95_ms": 43.68,
+          "min_ms": 40.706959,
+          "max_ms": 44.175042
+        },
+        {
+          "name": "PreToolUse Write Apache HttpClient 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 24줄",
+          "median_ms": 41.833312500000005,
+          "p95_ms": 43.154125,
+          "min_ms": 41.295291,
+          "max_ms": 43.566334
+        },
+        {
+          "name": "PreToolUse Write 일반 개인정보 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 22줄",
+          "median_ms": 40.7350835,
+          "p95_ms": 42.539917,
+          "min_ms": 39.832333,
+          "max_ms": 42.557334
+        },
+        {
+          "name": "PreToolUse Write Spring HTTP Service 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 28줄",
+          "median_ms": 42.305082999999996,
+          "p95_ms": 43.963708,
+          "min_ms": 41.589625,
+          "max_ms": 45.230167
+        },
+        {
+          "name": "PreToolUse Write Retrofit 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 25줄",
+          "median_ms": 41.5475,
+          "p95_ms": 43.039125,
+          "min_ms": 40.769917,
+          "max_ms": 43.236667
+        },
+        {
+          "name": "PreToolUse Write Feign 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 26줄",
+          "median_ms": 41.938229,
+          "p95_ms": 43.543584,
+          "min_ms": 39.862709,
+          "max_ms": 43.809791
+        },
+        {
+          "name": "PreToolUse Write 서버 평문 HTTP 수신 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 17줄",
+          "median_ms": 39.443124499999996,
+          "p95_ms": 40.646375,
+          "min_ms": 38.794042,
+          "max_ms": 41.0955
+        },
+        {
+          "name": "PreToolUse Write API 출력 정책 초과 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 21줄",
+          "median_ms": 39.951291999999995,
+          "p95_ms": 41.514417,
+          "min_ms": 39.461625,
+          "max_ms": 41.834208
+        },
+        {
+          "name": "PreToolUse Write 접속기록 구성요소 누락 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 16줄",
+          "median_ms": 39.7909375,
+          "p95_ms": 41.050334,
+          "min_ms": 39.039667,
+          "max_ms": 42.585916
+        },
+        {
+          "name": "PreToolUse Write 적법 Kotlin",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "기존 합성 fixture 16줄",
+          "median_ms": 39.973937500000005,
+          "p95_ms": 41.674833,
+          "min_ms": 39.209375,
+          "max_ms": 41.893625
+        },
+        {
+          "name": "PreToolUse Write 비이용자 내부망 평가 예외",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 19줄",
+          "median_ms": 39.6160625,
+          "p95_ms": 40.794208,
+          "min_ms": 39.013958,
+          "max_ms": 40.899625
+        },
+        {
+          "name": "PreToolUse Edit 대형 Java",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "메모리 생성 합성 소스 2000줄",
+          "median_ms": 215.1814585,
+          "p95_ms": 217.296458,
+          "min_ms": 212.25175,
+          "max_ms": 217.551166
+        },
+        {
+          "name": "PostToolUse Edit 대형 Java",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "메모리 생성 합성 소스 2000줄",
+          "median_ms": 214.958646,
+          "p95_ms": 217.94425,
+          "min_ms": 213.50725,
+          "max_ms": 219.519708
+        },
+        {
+          "name": "PreToolUse Write 대형 Kotlin",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "메모리 생성 합성 소스 2000줄",
+          "median_ms": 197.4761255,
+          "p95_ms": 199.562666,
+          "min_ms": 194.956958,
+          "max_ms": 200.71725
+        },
+        {
+          "name": "설정 탐색",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "프로젝트 루트에서 4단계 아래",
+          "median_ms": 0.0238125,
+          "p95_ms": 0.027333,
+          "min_ms": 0.021042,
+          "max_ms": 0.028416
+        },
+        {
+          "name": "항목 사전 로드",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "항목 12개 사전",
+          "median_ms": 0.0716665,
+          "p95_ms": 0.079917,
+          "min_ms": 0.064959,
+          "max_ms": 0.0865
+        },
+        {
+          "name": "analyze 적법 Java",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "기존 합성 fixture 27줄",
+          "median_ms": 0.896896,
+          "p95_ms": 0.934041,
+          "min_ms": 0.8515,
+          "max_ms": 1.051833
+        },
+        {
+          "name": "analyze 차단 Java",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "기존 합성 fixture 28줄",
+          "median_ms": 0.868875,
+          "p95_ms": 0.9955,
+          "min_ms": 0.801125,
+          "max_ms": 1.057958
+        },
+        {
+          "name": "analyze 평문 HTTP 전송 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 23줄",
+          "median_ms": 1.1256455,
+          "p95_ms": 1.163708,
+          "min_ms": 1.098916,
+          "max_ms": 1.207125
+        },
+        {
+          "name": "analyze 요청 DTO 평문 HTTP 전송 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 24줄",
+          "median_ms": 1.242604,
+          "p95_ms": 1.329666,
+          "min_ms": 1.191792,
+          "max_ms": 1.377958
+        },
+        {
+          "name": "analyze Spring RestClient 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 22줄",
+          "median_ms": 1.200875,
+          "p95_ms": 1.25025,
+          "min_ms": 1.161584,
+          "max_ms": 1.30675
+        },
+        {
+          "name": "analyze OkHttp 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 27줄",
+          "median_ms": 1.839104,
+          "p95_ms": 1.962375,
+          "min_ms": 1.766875,
+          "max_ms": 2.04975
+        },
+        {
+          "name": "analyze Apache HttpClient 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 24줄",
+          "median_ms": 2.078979,
+          "p95_ms": 2.178459,
+          "min_ms": 1.986791,
+          "max_ms": 2.315875
+        },
+        {
+          "name": "analyze 일반 개인정보 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 22줄",
+          "median_ms": 0.9603335,
+          "p95_ms": 1.003292,
+          "min_ms": 0.927792,
+          "max_ms": 1.083583
+        },
+        {
+          "name": "analyze Spring HTTP Service 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 28줄",
+          "median_ms": 2.125792,
+          "p95_ms": 2.256667,
+          "min_ms": 2.048292,
+          "max_ms": 2.636416
+        },
+        {
+          "name": "analyze Retrofit 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 25줄",
+          "median_ms": 1.406271,
+          "p95_ms": 1.493583,
+          "min_ms": 1.343209,
+          "max_ms": 1.549666
+        },
+        {
+          "name": "analyze Feign 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 26줄",
+          "median_ms": 1.7335215,
+          "p95_ms": 1.814458,
+          "min_ms": 1.666542,
+          "max_ms": 1.878458
+        },
+        {
+          "name": "analyze 서버 평문 HTTP 수신 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 17줄",
+          "median_ms": 0.518229,
+          "p95_ms": 0.568583,
+          "min_ms": 0.488916,
+          "max_ms": 0.617125
+        },
+        {
+          "name": "analyze API 출력 정책 초과 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 21줄",
+          "median_ms": 0.640583,
+          "p95_ms": 0.687417,
+          "min_ms": 0.589583,
+          "max_ms": 0.731209
+        },
+        {
+          "name": "analyze 접속기록 구성요소 누락 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 16줄",
+          "median_ms": 0.5182500000000001,
+          "p95_ms": 0.57425,
+          "min_ms": 0.481667,
+          "max_ms": 0.623542
+        },
+        {
+          "name": "analyze 비이용자 내부망 평가 예외",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 19줄",
+          "median_ms": 0.40225,
+          "p95_ms": 0.482417,
+          "min_ms": 0.361167,
+          "max_ms": 0.557583
+        },
+        {
+          "name": "analyze 대형 Java",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "메모리 생성 합성 소스 2000줄",
+          "median_ms": 175.69343750000002,
+          "p95_ms": 178.504375,
+          "min_ms": 174.163875,
+          "max_ms": 178.956208
+        },
+        {
+          "name": "analyze 대형 Kotlin",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "메모리 생성 합성 소스 2000줄",
+          "median_ms": 157.3986455,
+          "p95_ms": 159.327333,
+          "min_ms": 156.091583,
+          "max_ms": 159.926
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "version": "before",
+      "metadata": {
+        "measured_at": "2026-09-10T20:36:10+0900",
+        "platform": "macOS-26.4.1-arm64-arm-64bit-Mach-O",
+        "machine": "arm64",
+        "python": "3.14.6",
+        "samples": 50,
+        "warmups": 5,
+        "large_lines": 2000,
+        "note": "모두 합성 fixture 또는 메모리 생성 합성 소스 기준"
+      },
+      "results": [
+        {
+          "name": "PreToolUse Write 적법 Java",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "기존 합성 fixture 27줄",
+          "median_ms": 39.7680205,
+          "p95_ms": 41.26575,
+          "min_ms": 39.116125,
+          "max_ms": 41.82525
+        },
+        {
+          "name": "PostToolUse Write 적법 Java",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "기존 합성 fixture 27줄",
+          "median_ms": 39.6271665,
+          "p95_ms": 40.962084,
+          "min_ms": 39.006375,
+          "max_ms": 41.311166
+        },
+        {
+          "name": "PreToolUse Write 차단 Java",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "기존 합성 fixture 28줄",
+          "median_ms": 39.828520499999996,
+          "p95_ms": 41.70575,
+          "min_ms": 39.181917,
+          "max_ms": 42.61275
+        },
+        {
+          "name": "PreToolUse Write 평문 HTTP 전송 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 23줄",
+          "median_ms": 40.219125,
+          "p95_ms": 41.827959,
+          "min_ms": 39.581292,
+          "max_ms": 43.297583
+        },
+        {
+          "name": "PreToolUse Write 요청 DTO 평문 HTTP 전송 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 24줄",
+          "median_ms": 40.476958499999995,
+          "p95_ms": 42.007958,
+          "min_ms": 39.542042,
+          "max_ms": 42.488458
+        },
+        {
+          "name": "PreToolUse Write Spring RestClient 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 22줄",
+          "median_ms": 40.388896,
+          "p95_ms": 42.1235,
+          "min_ms": 39.662083,
+          "max_ms": 42.985833
+        },
+        {
+          "name": "PreToolUse Write OkHttp 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 27줄",
+          "median_ms": 40.882979000000006,
+          "p95_ms": 42.236208,
+          "min_ms": 40.052167,
+          "max_ms": 42.862041
+        },
+        {
+          "name": "PreToolUse Write Apache HttpClient 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 24줄",
+          "median_ms": 41.131958,
+          "p95_ms": 42.752833,
+          "min_ms": 40.392916,
+          "max_ms": 42.919833
+        },
+        {
+          "name": "PreToolUse Write 일반 개인정보 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 22줄",
+          "median_ms": 40.1181455,
+          "p95_ms": 41.784708,
+          "min_ms": 39.203834,
+          "max_ms": 42.031916
+        },
+        {
+          "name": "PreToolUse Write Spring HTTP Service 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 28줄",
+          "median_ms": 41.754875,
+          "p95_ms": 43.293958,
+          "min_ms": 41.0655,
+          "max_ms": 44.010167
+        },
+        {
+          "name": "PreToolUse Write Retrofit 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 25줄",
+          "median_ms": 40.7124585,
+          "p95_ms": 42.064292,
+          "min_ms": 40.132584,
+          "max_ms": 42.393916
+        },
+        {
+          "name": "PreToolUse Write Feign 평문 HTTP 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 26줄",
+          "median_ms": 41.130812,
+          "p95_ms": 42.684959,
+          "min_ms": 40.255417,
+          "max_ms": 44.197416
+        },
+        {
+          "name": "PreToolUse Write 서버 평문 HTTP 수신 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 17줄",
+          "median_ms": 38.7885415,
+          "p95_ms": 39.945375,
+          "min_ms": 38.02725,
+          "max_ms": 40.09075
+        },
+        {
+          "name": "PreToolUse Write API 출력 정책 초과 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 21줄",
+          "median_ms": 39.4193335,
+          "p95_ms": 41.015416,
+          "min_ms": 38.671375,
+          "max_ms": 41.479333
+        },
+        {
+          "name": "PreToolUse Write 접속기록 구성요소 누락 차단",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 16줄",
+          "median_ms": 39.2692705,
+          "p95_ms": 40.817125,
+          "min_ms": 38.509417,
+          "max_ms": 41.669541
+        },
+        {
+          "name": "PreToolUse Write 적법 Kotlin",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "기존 합성 fixture 16줄",
+          "median_ms": 39.375583500000005,
+          "p95_ms": 40.766125,
+          "min_ms": 38.647875,
+          "max_ms": 41.307792
+        },
+        {
+          "name": "PreToolUse Write 비이용자 내부망 평가 예외",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "합성 fixture 19줄",
+          "median_ms": 38.957854499999996,
+          "p95_ms": 40.23275,
+          "min_ms": 38.245292,
+          "max_ms": 40.672875
+        },
+        {
+          "name": "PreToolUse Edit 대형 Java",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "메모리 생성 합성 소스 2000줄",
+          "median_ms": 166.585375,
+          "p95_ms": 168.037375,
+          "min_ms": 164.429375,
+          "max_ms": 168.64725
+        },
+        {
+          "name": "PostToolUse Edit 대형 Java",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "메모리 생성 합성 소스 2000줄",
+          "median_ms": 166.71883350000002,
+          "p95_ms": 168.680042,
+          "min_ms": 165.073708,
+          "max_ms": 169.922583
+        },
+        {
+          "name": "PreToolUse Write 대형 Kotlin",
+          "layer": "새 프로세스 훅 전체",
+          "input_label": "메모리 생성 합성 소스 2000줄",
+          "median_ms": 143.46335399999998,
+          "p95_ms": 145.414834,
+          "min_ms": 141.602459,
+          "max_ms": 145.994333
+        },
+        {
+          "name": "설정 탐색",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "프로젝트 루트에서 4단계 아래",
+          "median_ms": 0.023792,
+          "p95_ms": 0.034375,
+          "min_ms": 0.021333,
+          "max_ms": 0.037667
+        },
+        {
+          "name": "항목 사전 로드",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "항목 12개 사전",
+          "median_ms": 0.073292,
+          "p95_ms": 0.078708,
+          "min_ms": 0.067583,
+          "max_ms": 0.083834
+        },
+        {
+          "name": "analyze 적법 Java",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "기존 합성 fixture 27줄",
+          "median_ms": 0.781166,
+          "p95_ms": 0.890167,
+          "min_ms": 0.768041,
+          "max_ms": 0.908208
+        },
+        {
+          "name": "analyze 차단 Java",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "기존 합성 fixture 28줄",
+          "median_ms": 0.818146,
+          "p95_ms": 0.852791,
+          "min_ms": 0.799417,
+          "max_ms": 0.970584
+        },
+        {
+          "name": "analyze 평문 HTTP 전송 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 23줄",
+          "median_ms": 1.0617705000000002,
+          "p95_ms": 1.12,
+          "min_ms": 1.004667,
+          "max_ms": 1.268
+        },
+        {
+          "name": "analyze 요청 DTO 평문 HTTP 전송 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 24줄",
+          "median_ms": 1.1745415000000001,
+          "p95_ms": 1.295542,
+          "min_ms": 1.115042,
+          "max_ms": 1.324417
+        },
+        {
+          "name": "analyze Spring RestClient 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 22줄",
+          "median_ms": 1.141375,
+          "p95_ms": 1.261125,
+          "min_ms": 1.082375,
+          "max_ms": 1.307
+        },
+        {
+          "name": "analyze OkHttp 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 27줄",
+          "median_ms": 1.7271874999999999,
+          "p95_ms": 1.89525,
+          "min_ms": 1.615416,
+          "max_ms": 1.959584
+        },
+        {
+          "name": "analyze Apache HttpClient 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 24줄",
+          "median_ms": 1.9681045,
+          "p95_ms": 2.040458,
+          "min_ms": 1.941833,
+          "max_ms": 2.064
+        },
+        {
+          "name": "analyze 일반 개인정보 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 22줄",
+          "median_ms": 0.9,
+          "p95_ms": 0.920958,
+          "min_ms": 0.879916,
+          "max_ms": 0.929834
+        },
+        {
+          "name": "analyze Spring HTTP Service 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 28줄",
+          "median_ms": 2.0047085,
+          "p95_ms": 2.083041,
+          "min_ms": 1.91975,
+          "max_ms": 2.142833
+        },
+        {
+          "name": "analyze Retrofit 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 25줄",
+          "median_ms": 1.3175205,
+          "p95_ms": 1.38775,
+          "min_ms": 1.263917,
+          "max_ms": 1.4105
+        },
+        {
+          "name": "analyze Feign 평문 HTTP 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 26줄",
+          "median_ms": 1.6481249999999998,
+          "p95_ms": 1.747959,
+          "min_ms": 1.562417,
+          "max_ms": 1.777625
+        },
+        {
+          "name": "analyze 서버 평문 HTTP 수신 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 17줄",
+          "median_ms": 0.508375,
+          "p95_ms": 0.529208,
+          "min_ms": 0.491375,
+          "max_ms": 0.582959
+        },
+        {
+          "name": "analyze API 출력 정책 초과 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 21줄",
+          "median_ms": 0.6145,
+          "p95_ms": 0.633042,
+          "min_ms": 0.5875,
+          "max_ms": 0.662917
+        },
+        {
+          "name": "analyze 접속기록 구성요소 누락 차단",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 16줄",
+          "median_ms": 0.4384585,
+          "p95_ms": 0.454291,
+          "min_ms": 0.421542,
+          "max_ms": 0.472833
+        },
+        {
+          "name": "analyze 비이용자 내부망 평가 예외",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "합성 fixture 19줄",
+          "median_ms": 0.3799785,
+          "p95_ms": 0.449834,
+          "min_ms": 0.350042,
+          "max_ms": 0.499792
+        },
+        {
+          "name": "analyze 대형 Java",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "메모리 생성 합성 소스 2000줄",
+          "median_ms": 125.5826665,
+          "p95_ms": 126.5285,
+          "min_ms": 124.739584,
+          "max_ms": 126.746
+        },
+        {
+          "name": "analyze 대형 Kotlin",
+          "layer": "동일 프로세스 엔진 내부",
+          "input_label": "메모리 생성 합성 소스 2000줄",
+          "median_ms": 101.4282915,
+          "p95_ms": 102.997083,
+          "min_ms": 100.354958,
+          "max_ms": 103.633875
+        }
+      ]
+    }
+  ]
+}
