@@ -1,6 +1,6 @@
 {
   "name": "pipa-guard",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "한국 개인정보 보호조치 위반을 지원하는 Java·Kotlin 편집 시점에 조항 근거와 함께 차단합니다.",
   "author": {
     "name": "juahyun",
