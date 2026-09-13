@@ -1,0 +1,32 @@
+{
+  "description": "Codex가 Java·Kotlin 파일을 패치하기 전후에 개인정보 보호조치를 검사합니다.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^apply_patch$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$(git rev-parse --show-toplevel)/bin/pipa_check.py\"",
+            "timeout": 10,
+            "statusMessage": "개인정보 보호조치 검사 중"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "^apply_patch$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$(git rev-parse --show-toplevel)/bin/pipa_check.py\"",
+            "timeout": 10,
+            "statusMessage": "개인정보 보호조치 경고 확인 중",
+            "additionalContextLimit": 2500
+          }
+        ]
+      }
+    ]
+  }
+}

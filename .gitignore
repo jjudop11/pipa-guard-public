@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.DS_Store
+
+# 내부 기록과 비밀 설정은 공개 배포에 포함하지 않는다.
+[Ss][Tt][Aa][Tt][Ee].[Mm][Dd]
+[Dd][Ee][Cc][Ii][Ss][Ii][Oo][Nn][Ss].[Mm][Dd]
+AGENTS.md
+docs/
+.env
+.env.*
+*.pem
+*.key
+*.log

@@ -1,0 +1,280 @@
+{
+  "_meta": {
+    "version": "0.12.0",
+    "note": "규칙 ID의 단일 출처다. 규칙 ID를 새로 만들거나 조항 연결을 바꿀 때는 이 파일을 먼저 고친다. README.md·rules/articles.md는 이 파일을 따라간다.",
+    "consistency": "tests/run_fixtures.py가 세 가지를 검사한다. (1) status=active 규칙의 checks가 bin/pipa_check.py가 실제로 생성하는 (rule, check) 집합과 정확히 같은지 (2) rules/articles.md에 등장하는 모든 규칙 ID가 이 파일에 있는지 (3) article이 확정된 규칙이 rules/articles.md에 등장하는지.",
+    "article_policy": "article은 근거 조항이 확정된 경우에만 채운다. null이면 근거 미확정이며 구현하지 않는다. 규칙 9(조항 원문을 요약·의역하지 않는다)에 따라 원문 인용 없이는 Finding을 만들 수 없기 때문이다.",
+    "confidence_policy": "high는 PreToolUse deny, medium/low는 PostToolUse 경고로 라우팅된다. (D-03)",
+    "fixture_policy": "checks[].fixtures는 그 검사의 동작을 고정하는 fixture 목록이다. high 검사는 fixtures/violation의 `pipa-fixture-expect:`로, medium 검사는 `pipa-fixture-expect-warn:`(경고로 나와야 하고 high로 올라가면 실패)와 fixtures/compliant의 `pipa-fixture-expect-clean`(경고도 0건)으로 고정한다. 목록이 빈 검사는 오탐 방어가 없는 검사다."
+  },
+
+  "rules": [
+    {
+      "id": "K-ENC-002",
+      "title": "비밀번호 일방향 암호화",
+      "article": "제7조 제1항 단서",
+      "article_note": "다만, 비밀번호를 저장하는 경우에는 복호화되지 아니하도록 일방향 암호화하여 저장하여야 한다.",
+      "status": "active",
+      "phase": 0,
+      "languages": [".java", ".kt", ".kts"],
+      "checks": [
+        {
+          "check": "two-way",
+          "confidence": "high",
+          "confidence_downgrade": "별칭 강도가 weak면 medium",
+          "detects": "양방향 암호 알고리즘 적용",
+          "fixtures": ["V001_PasswordAesEntity.java", "V004_PasswordJasypt.java", "V007_PasswordCipherAcrossStatements.java", "V009_PasswordCipherAlgorithmConstant.java"]
+        },
+        {
+          "check": "weak-hash",
+          "confidence": "high",
+          "confidence_downgrade": "별칭 강도가 weak면 medium",
+          "detects": "MD2/MD4/MD5/SHA-1",
+          "fixtures": ["V002_PasswordMd5.java", "V006_PinSha1.java", "V008_PinSha1AlgorithmConstant.java"]
+        },
+        {
+          "check": "two-way-converter",
+          "confidence": "high",
+          "confidence_downgrade": "별칭 강도가 weak면 medium",
+          "detects": "@Convert로 양방향 컨버터 연결",
+          "fixtures": ["V003_PasswordConverter.java"]
+        },
+        {
+          "check": "encoding-not-encryption",
+          "confidence": "high",
+          "confidence_downgrade": "별칭 강도가 weak면 medium",
+          "detects": "Base64를 암호화로 사용",
+          "fixtures": ["V005_PasswordBase64.kt"]
+        },
+        {
+          "check": "unsalted-hash",
+          "confidence": "medium",
+          "detects": "salt·반복 없는 단순 해시 (파일 단위 판정)",
+          "fixtures": ["V010_PasswordUnsaltedSha256.java", "C014_SaltedIteratedSha256.java"]
+        },
+        {
+          "check": "plaintext-compare",
+          "confidence": "medium",
+          "detects": "equals() 직접 비교",
+          "fixtures": ["V011_PasswordPlaintextCompare.java", "C008_ConfirmInput.java"]
+        }
+      ]
+    },
+    {
+      "id": "K-ENC-001",
+      "title": "이용자 개인정보 7항목 암호화 저장",
+      "article": "제7조 제2항",
+      "article_note": "대상은 제2조 제2호의 이용자. 주민등록번호·여권번호·운전면허번호·외국인등록번호·신용카드번호·계좌번호·생체인식정보 7항목에 무조건 적용된다. 양방향 암호화가 적법하므로 K-ENC-002와 판정 방향이 반대다.",
+      "status": "active",
+      "phase": 2,
+      "dictionary_phase": 1,
+      "dictionary_note": "사전 항목(rules/pii_items.json)은 Phase 1에 등재하고 규칙 활성화는 Phase 2다. 사전에 있다고 규칙이 도는 것은 아니다.",
+      "checks": [
+        {
+          "check": "plaintext-sized-column",
+          "confidence": "high",
+          "confidence_downgrade": "별칭 강도가 weak면 medium",
+          "detects": "암호문 최소 길이보다 짧은 영속 문자열 컬럼",
+          "fixtures": ["V012_ResidentNumberPlainColumn.java", "V013_CreditCardPlainColumn.kt", "V018_EncryptedConverterTooShort.java", "C056_GeneralPiiOutsideUserStorageItems.java"]
+        },
+        {
+          "check": "unprotected-column",
+          "confidence": "medium",
+          "confidence_downgrade": "별칭 강도가 weak면 low",
+          "detects": "영속 컬럼에 암호화 연결이 보이지 않음. 애플리케이션 계층 암호화 가능성이 있어 경고만 함",
+          "fixtures": ["V014_PassportUnprotectedColumn.java", "V017_BiometricUnprotectedColumn.java", "C016_AesForArticle7Item2Fields.java", "C019_TransientArticle7Field.java", "C020_KotlinEncryptedArticle7Fields.kt", "C023_EncryptedColumnTransformer.java"]
+        },
+        {
+          "check": "plaintext-sql-write",
+          "confidence": "high",
+          "confidence_downgrade": "별칭 강도가 weak면 medium",
+          "detects": "원문 개인정보 식별자가 SQL INSERT/UPDATE 인자로 직접 전달됨",
+          "fixtures": ["V015_ResidentNumberRawJdbcWrite.java", "V016_AccountNumberRawJdbcWrite.java", "V019_MixedEncryptedAndPlainJdbcWrite.java", "C022_EncryptedBeforeJdbcWrite.java", "C024_InlineEncryptedJdbcWrite.java"]
+        }
+      ]
+    },
+    {
+      "id": "K-ENC-003",
+      "title": "이용자가 아닌 정보주체의 고유식별정보 암호화",
+      "article": "제7조 제3항",
+      "article_note": "정보주체 유형 × 저장 구간의 함수다. 내부망 저장 시 주민등록번호를 제외한 고유식별정보만 영향평가·위험도 분석 결과에 따라 적용범위를 조정할 수 있다. riskAssessment는 근거 종류·문서·날짜·결론·면제 항목을 모두 명시해야 하며, 단순히 객체가 존재한다고 보호를 끄지 않는다. .pipa.json의 subjectType/storageZone/riskAssessment가 이 분기의 입력이다. (D-02, D-20)",
+      "status": "active",
+      "phase": 2,
+      "checks": [
+        {
+          "check": "plaintext-sized-column",
+          "confidence": "high",
+          "confidence_downgrade": "별칭 강도가 weak면 medium",
+          "detects": "비이용자 고유식별정보의 암호문 최소 길이보다 짧은 영속 문자열 컬럼",
+          "fixtures": ["V020_NonUserInternalResidentPlainColumn.java", "V021_NonUserInternetPassportPlainColumn.java", "V023_NonUserInternalIncompleteAssessment.java", "C026_NonUserInternalPassportAssessmentExemption.java", "C027_NonUserInternalMixedAssessmentScope.java", "C028_NonUserInternetEncryptedUniqueIds.java", "C057_GeneralPiiOutsideNonUserStorageItems.java"]
+        },
+        {
+          "check": "unprotected-column",
+          "confidence": "medium",
+          "confidence_downgrade": "별칭 강도가 weak면 low",
+          "detects": "비이용자 고유식별정보 영속 컬럼에 암호화 연결이 보이지 않음. 애플리케이션 계층 암호화 가능성이 있어 경고만 함",
+          "fixtures": ["V022_NonUserInternalDriverUnprotected.java", "C026_NonUserInternalPassportAssessmentExemption.java", "C027_NonUserInternalMixedAssessmentScope.java", "C028_NonUserInternetEncryptedUniqueIds.java"]
+        },
+        {
+          "check": "plaintext-sql-write",
+          "confidence": "high",
+          "confidence_downgrade": "별칭 강도가 weak면 medium",
+          "detects": "비이용자 고유식별정보 원문 식별자가 SQL INSERT/UPDATE 인자로 직접 전달됨",
+          "fixtures": ["V024_NonUserInternalPassportRawJdbcWrite.java", "C030_NonUserEncryptedJdbcWrite.java"]
+        }
+      ]
+    },
+    {
+      "id": "K-ENC-004",
+      "title": "인터넷망 구간 송·수신 암호화",
+      "article": "제7조 제4항",
+      "article_note": "저장이 아니라 전송 구간 암호화가 대상이다. Java·Kotlin의 Spring RestTemplate·WebClient·RestClient·HTTP Service, JDK HttpClient, OkHttp, Apache HttpClient, Retrofit, OpenFeign 등 명시적 HTTP 클라이언트에서 개인정보 직접 인자와 요청 DTO 얕은 전파를 판정한다. 선언형 클라이언트는 같은 파일의 인터페이스 선언, 프록시 수신자와 실제 실행 호출이 모두 연결된 경우만 본다. Spring 서버 수신은 요청 매핑·요청 바인딩·개인정보 후보가 함께 보일 때 .pipa.json의 inboundTransport 배포 근거를 확인한다. 명시적 외부 평문 송수신은 high, 목적지나 서버 TLS 경계 미확인은 medium이다. HTTPS·명시적 내부 주소·암호화 payload·근거가 있는 애플리케이션 또는 신뢰 프록시 TLS는 제외한다. 서버 응답 내용의 적법성은 K-LEAK-002와 섞지 않는다. (D-21, D-22, D-23, D-24, D-25, D-26)",
+      "status": "active",
+      "phase": 2,
+      "checks": [
+        {
+          "check": "plaintext-http-transmission",
+          "confidence": "high",
+          "confidence_downgrade": "별칭 강도가 weak면 medium",
+          "detects": "개인정보 원문을 명시적 외부 http:// 클라이언트 호출로 전송",
+          "fixtures": ["V025_PlainHttpResidentTransmission.java", "V026_PlainHttpPassportWebClient.kt", "V028_Base64HttpPassport.java", "V029_PlainHttpPasswordTransmission.java", "V030_PlainHttpEndpointConstant.java", "V031_PlainHttpRequestDtoConstructor.java", "V032_PlainHttpRequestDtoSetter.java", "V033_PlainHttpKotlinBuilderDto.kt", "V036_PlainHttpSpringRestClient.java", "V037_PlainHttpOkHttpRequest.java", "V038_PlainHttpApacheClient.java", "V039_PlainHttpFullName.java", "V040_PlainHttpUserEmailAddress.java", "V041_PlainHttpUserMobilePhoneNumber.java", "V042_PlainHttpAmbiguousContact.java", "V043_PlainHttpSpringHttpService.java", "V044_PlainHttpRetrofitCall.java", "V045_PlainHttpFeignClient.java", "V047_PlainHttpJdkHttpClient.java", "V048_PlainHttpKotlinRetrofitSuspend.kt", "V049_PlainHttpSpringReactiveSubscribed.java", "C031_HttpsResidentTransmission.java", "C032_EncryptedPayloadOverHttp.java", "C033_PrivateNetworkHttpTransmission.java", "C034_UrlWithoutTransmission.java", "C036_HttpNonPiiTransmission.java", "C037_HttpsEndpointConstant.java", "C038_HttpsPassportWebClient.kt", "C039_EncryptedRequestDtoOverHttp.java", "C040_NonPiiRequestDtoOverHttp.java", "C041_HttpsRequestDto.java", "C044_RequestTaintDoesNotCrossMethods.java", "C045_EncryptedValueInRequestSetter.java", "C046_HttpsSpringRestClient.java", "C047_HttpsOkHttpRequest.java", "C048_InternalApacheHttpClient.java", "C049_GenericExecuteIsNotHttpSend.java", "C050_EncryptedOkHttpPayload.java", "C051_RestClientRetrieveWithoutTerminal.java", "C052_GenericNamesOverHttp.java", "C053_OrganizationContactsOverHttp.java", "C054_HttpsGeneralPersonalInfo.java", "C055_EncryptedFullNameOverHttp.java", "C058_DeclarativeClientDeclarationsOnly.java", "C059_SameMethodNameOnNonHttpObject.java", "C060_HttpsSpringHttpService.java", "C061_HttpsRetrofitCall.java", "C062_HttpsFeignClient.java", "C063_RetrofitCallNotExecuted.java", "C064_SpringReactiveCallNotSubscribed.java", "C065_EncryptedFeignPayload.java", "C066_GenericSendIsNotJdkHttpClient.java", "C067_HttpsKotlinRetrofitSuspend.kt", "C068_DeclarativeReceiverShadowing.java"]
+        },
+        {
+          "check": "unverified-network-transmission",
+          "confidence": "medium",
+          "confidence_downgrade": "별칭 강도가 weak면 low",
+          "detects": "HTTP 클라이언트로 개인정보 원문을 전송하지만 목적지 스킴을 소스에서 확인할 수 없음",
+          "fixtures": ["V027_UnknownTransportDriverLicense.java", "V034_UnknownTransportRequestDto.java", "V046_UnknownSpringHttpServiceEndpoint.java", "C031_HttpsResidentTransmission.java", "C032_EncryptedPayloadOverHttp.java", "C033_PrivateNetworkHttpTransmission.java", "C034_UrlWithoutTransmission.java", "C035_EncryptedUnknownTransport.java", "C036_HttpNonPiiTransmission.java", "C037_HttpsEndpointConstant.java", "C038_HttpsPassportWebClient.kt", "C039_EncryptedRequestDtoOverHttp.java", "C040_NonPiiRequestDtoOverHttp.java", "C041_HttpsRequestDto.java", "C044_RequestTaintDoesNotCrossMethods.java", "C045_EncryptedValueInRequestSetter.java", "C046_HttpsSpringRestClient.java", "C047_HttpsOkHttpRequest.java", "C048_InternalApacheHttpClient.java", "C049_GenericExecuteIsNotHttpSend.java", "C050_EncryptedOkHttpPayload.java", "C051_RestClientRetrieveWithoutTerminal.java", "C058_DeclarativeClientDeclarationsOnly.java", "C059_SameMethodNameOnNonHttpObject.java", "C060_HttpsSpringHttpService.java", "C061_HttpsRetrofitCall.java", "C062_HttpsFeignClient.java", "C063_RetrofitCallNotExecuted.java", "C064_SpringReactiveCallNotSubscribed.java", "C065_EncryptedFeignPayload.java", "C066_GenericSendIsNotJdkHttpClient.java", "C067_HttpsKotlinRetrofitSuspend.kt", "C068_DeclarativeReceiverShadowing.java"]
+        },
+        {
+          "check": "tls-verification-disabled",
+          "confidence": "medium",
+          "confidence_downgrade": "별칭 강도가 weak면 low",
+          "detects": "개인정보를 HTTPS로 전송하는 파일에 인증서·호스트명 검증 무력화 신호가 있음. 해당 클라이언트 인스턴스 연결은 확정할 수 없어 경고만 함",
+          "fixtures": ["V035_HttpsNoopHostnameVerifier.java", "C031_HttpsResidentTransmission.java", "C038_HttpsPassportWebClient.kt", "C042_NoopVerifierWithoutPiiTransmission.java", "C043_TrustAllNameIsNotTlsBypass.java", "C046_HttpsSpringRestClient.java", "C047_HttpsOkHttpRequest.java", "C054_HttpsGeneralPersonalInfo.java", "C060_HttpsSpringHttpService.java", "C061_HttpsRetrofitCall.java", "C062_HttpsFeignClient.java", "C067_HttpsKotlinRetrofitSuspend.kt"]
+        },
+        {
+          "check": "plaintext-server-receive",
+          "confidence": "high",
+          "confidence_downgrade": "별칭 강도가 weak면 medium",
+          "detects": "개인정보 요청 바인딩이 있는 Spring 서버 endpoint를 외부 인터넷망에서 TLS 없이 수신한다고 inboundTransport 근거로 명시",
+          "fixtures": ["V051_PlainSpringServerPiiReceive.java", "V052_PlainKotlinServerDtoReceive.kt", "V054_PlainSpringPojoDtoReceive.java", "C069_NonPiiSpringServer.java", "C070_ApplicationTlsSpringServer.java", "C071_TrustedProxyTlsSpringServer.java", "C072_InternalSpringServer.java", "C073_ResponseOnlyPiiSpringServer.java", "C074_ControllerDeclarationOnly.java", "C075_PiiDtoWithoutRequestBinding.java", "C076_EmbeddedHttpBehindTlsProxy.java", "C077_UnrelatedPojoRequest.java"]
+        },
+        {
+          "check": "unverified-server-receive-tls",
+          "confidence": "medium",
+          "confidence_downgrade": "별칭 강도가 weak면 low",
+          "detects": "개인정보 요청 바인딩이 있는 Spring 서버 endpoint의 외부 노출·TLS 종단 근거가 없거나 불완전함",
+          "fixtures": ["V050_UnverifiedSpringServerPiiReceive.java", "V053_IncompleteInboundTransport.java", "C069_NonPiiSpringServer.java", "C070_ApplicationTlsSpringServer.java", "C071_TrustedProxyTlsSpringServer.java", "C072_InternalSpringServer.java", "C073_ResponseOnlyPiiSpringServer.java", "C074_ControllerDeclarationOnly.java", "C075_PiiDtoWithoutRequestBinding.java", "C076_EmbeddedHttpBehindTlsProxy.java", "C077_UnrelatedPojoRequest.java"]
+        }
+      ]
+    },
+    {
+      "id": "K-ENC-005",
+      "title": "취급자 단말·보조저장매체 저장 암호화",
+      "article": "제7조 제5항",
+      "article_note": "파일#메서드별 localStoragePolicies가 개인정보취급자의 컴퓨터·모바일 기기·보조저장매체를 근거와 함께 지정하고 명시적 파일 sink에 원문 개인정보가 도달할 때 차단한다. 위치 정책이 없거나 불완전하면 경고하고, server 선언은 제5항 범위에서 제외한다. 이용자는 사전의 모든 개인정보, 비이용자는 고유식별정보·생체인식정보만 대상으로 한다. 제2조 제14호의 보조저장매체를 포함한다.",
+      "status": "active",
+      "phase": 3,
+      "languages": [".java", ".kt", ".kts"],
+      "checks": [
+        {
+          "check": "plaintext-device-storage",
+          "confidence": "high",
+          "confidence_downgrade": "별칭 강도가 weak면 medium",
+          "detects": "완전한 저장 대상 정책이 개인정보취급자 컴퓨터·모바일 기기·보조저장매체를 지정하고 원문 개인정보가 명시적 파일 저장 sink에 도달",
+          "fixtures": ["V065_WorkstationPlaintextFile.java", "V067_RemovablePlaintextKotlin.kt", "V068_MobileFileOutputStream.java", "C088_ServerFileStorage.java", "C089_EncryptedWorkstationFile.java", "C090_NonUserPasswordOnWorkstation.java", "C091_GenericWriterIsNotFile.java", "C092_OneWayPasswordWorkstationFile.java"]
+        },
+        {
+          "check": "unverified-device-storage-target",
+          "confidence": "medium",
+          "confidence_downgrade": "별칭 강도가 weak면 low",
+          "detects": "원문 개인정보가 명시적 파일 저장 sink에 도달하지만 실행·저장 위치 정책이 없거나 불완전함",
+          "fixtures": ["V066_UnverifiedLocalStorageTarget.java", "V069_IncompleteFileWriterPolicy.java", "C088_ServerFileStorage.java", "C089_EncryptedWorkstationFile.java", "C090_NonUserPasswordOnWorkstation.java", "C091_GenericWriterIsNotFile.java", "C092_OneWayPasswordWorkstationFile.java"]
+        }
+      ]
+    },
+    {
+      "id": "K-LOG-001",
+      "title": "접속기록 구성요소 누락",
+      "article": "제8조 제1항 및 제2조 제3호",
+      "article_note": "명시적 accessLogPolicies가 지정한 logger 호출에서 제2조 제3호의 구성요소를 확인한다. 코드 인자는 exact identifier로, logger timestamp·MDC·보안 컨텍스트 등 외부 공급은 evidence가 있는 external 선언으로 인정한다. 완전한 정책과 실제 logger sink가 연결된 구성요소 누락만 high이며 정책 불완전은 medium이다.",
+      "status": "active",
+      "phase": 3,
+      "languages": [".java", ".kt", ".kts"],
+      "checks": [
+        {
+          "check": "missing-access-log-component",
+          "confidence": "high",
+          "detects": "완전한 접속기록 정책과 logger sink가 연결됐지만 제2조 제3호 구성요소의 직접 인자가 누락",
+          "fixtures": ["V063_MissingAccessLogSubject.java", "C085_CompleteAccessLog.java", "C086_BusinessLogIsNotAccessRecord.java", "C087_AccessLogMdcComponents.java"]
+        },
+        {
+          "check": "unverified-access-log-components",
+          "confidence": "medium",
+          "detects": "접속기록 정책이 지정한 logger sink는 보이지만 구성요소 공급 선언 또는 근거가 불완전",
+          "fixtures": ["V064_IncompleteAccessLogPolicy.java", "C085_CompleteAccessLog.java", "C086_BusinessLogIsNotAccessRecord.java", "C087_AccessLogMdcComponents.java"]
+        }
+      ]
+    },
+    {
+      "id": "K-LEAK-001",
+      "title": "로그 출력 최소화 — 용도에 불필요한 개인정보가 로그 sink에 도달",
+      "article": "제12조 제1항",
+      "article_note": "로그 파일 생성은 제12조 제1항의 출력 범위에서 검토한다. 선언된 Logger 수신자의 직접 로그 인자에서 개인정보 후보를 찾고, outputPolicies의 파일#메서드별 용도·허용 항목·근거와 비교한다. 완전한 정책의 허용 범위 초과만 high이며 정책 미확인은 medium이다. 제8조가 요구하는 접속기록과 충돌하지 않도록 로그 자체를 금지하지 않는다. (D-27, D-28)",
+      "status": "active",
+      "phase": 2,
+      "languages": [".java", ".kt", ".kts"],
+      "checks": [
+        {
+          "check": "excessive-log-output",
+          "confidence": "high",
+          "confidence_downgrade": "별칭 강도가 weak면 medium",
+          "detects": "완전한 출력 정책이 허용하지 않은 개인정보 항목을 선언된 logger 인자로 전달",
+          "fixtures": ["V057_ExcessiveSlf4jLog.java", "V060_AmbiguousContactLogPolicyExcess.java", "C080_AllowedAuditLog.java", "C081_GenericInfoMethod.java", "C084_LogLabelIsNotPiiValue.java"]
+        },
+        {
+          "check": "unverified-log-output-purpose",
+          "confidence": "medium",
+          "confidence_downgrade": "별칭 강도가 weak면 low",
+          "detects": "개인정보 로그 출력은 보이지만 완전한 용도·허용 항목 정책을 확인할 수 없음",
+          "fixtures": ["V058_UnverifiedSlf4jLog.java", "C080_AllowedAuditLog.java", "C081_GenericInfoMethod.java", "C084_LogLabelIsNotPiiValue.java"]
+        }
+      ]
+    },
+    {
+      "id": "K-LEAK-002",
+      "title": "API 응답 최소화 — 용도에 불필요한 개인정보 항목이 응답에 실림",
+      "article": "제12조 제1항",
+      "article_note": "Spring API 응답의 직접 반환값과 같은 파일의 반환 DTO 항목을 outputPolicies의 파일#메서드별 용도·허용 항목·근거와 비교한다. 완전한 정책의 허용 범위 초과만 high이며 정책 미확인은 medium이다. 요청 DTO는 반환 항목으로 전파하지 않는다. K-ENC-004는 인터넷망 전송 구간 암호화, 이 규칙은 HTTPS 여부와 무관한 출력 최소성을 본다. (D-27, D-28)",
+      "status": "active",
+      "phase": 2,
+      "languages": [".java", ".kt", ".kts"],
+      "checks": [
+        {
+          "check": "excessive-api-response",
+          "confidence": "high",
+          "confidence_downgrade": "별칭 강도가 weak면 medium",
+          "detects": "완전한 출력 정책이 허용하지 않은 개인정보 항목을 Spring API가 반환",
+          "fixtures": ["V055_ExcessiveSpringApiResponse.java", "C078_AllowedSpringApiResponse.java", "C079_NonPiiSpringApiResponse.java", "C082_RequestDtoIsNotApiResponse.java", "C083_AllowedKotlinApiResponse.kt"]
+        },
+        {
+          "check": "unverified-api-output-purpose",
+          "confidence": "medium",
+          "confidence_downgrade": "별칭 강도가 weak면 low",
+          "detects": "개인정보 API 응답은 보이지만 완전한 용도·허용 항목 정책을 확인할 수 없음",
+          "fixtures": ["V056_UnverifiedSpringApiResponse.java", "V059_IncompleteApiOutputPolicy.java", "V061_UnknownApiOutputPolicyItem.java", "V062_DuplicateApiOutputPolicy.java", "C073_ResponseOnlyPiiSpringServer.java", "C078_AllowedSpringApiResponse.java", "C079_NonPiiSpringApiResponse.java", "C082_RequestDtoIsNotApiResponse.java", "C083_AllowedKotlinApiResponse.kt"]
+        }
+      ]
+    },
+    {
+      "id": "K-LEAK-003",
+      "title": "마스킹 누락 — 화면표시·출력물에 개인정보 전체 값 노출",
+      "article": null,
+      "article_note": "독립적인 일반 마스킹 의무의 현행 근거를 확인하지 못했다. 개인정보보호위원회 2025.11 안내서는 마스킹을 제12조 제1항의 출력 항목 최소화 방법 중 하나로 설명한다. 따라서 마스킹 부재만 판정하는 규칙은 구현하지 않고, 특정 출력 용도에서 마스킹을 보호조치로 채택한 경우 K-LEAK-001/002의 준수 수단으로만 인정한다. (D-27)",
+      "status": "deferred",
+      "phase": 2,
+      "checks": []
+    }
+  ]
+}

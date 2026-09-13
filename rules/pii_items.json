@@ -1,0 +1,326 @@
+{
+  "_meta": {
+    "version": "0.4.0",
+    "phase": 1,
+    "note": "제7조 제1항의 인증정보(비밀번호·PIN), 제7조 제2항 각 호의 7항목과 제7조 제4항 전송 판정용 일반 개인정보 후보(성명·이메일 주소·휴대전화번호)를 등재한다. 항목이 사전에 있다는 것은 '개인정보 후보'라는 뜻일 뿐이고, 차단은 (후보) AND (보호 대상 sink 도달) AND (보호 장치 부재)일 때만 한다. (D-04, D-05)",
+    "matching": "정규화(소문자화 + '_' 제거) 후 완전일치만 인정한다. 부분 문자열 매칭을 하지 않으므로 orderNo, merchantNo 같은 식별자는 매칭되지 않는다. name_prefixes는 최대 3회까지 반복 제거한다.",
+    "encryption": "one_way_only = 제7조 제1항 단서 대상. 복호화 가능한 저장 자체가 위반이다. two_way_allowed = 제7조 제2항·제3항에 따라 암호화하여 저장해야 하지만 양방향 암호화가 적법하다. transmission_only = 제7조 제4항 전송 판정에만 쓰며 제2항·제3항 저장 규칙의 대상이 아니다. K-ENC-001은 two_way_allowed, K-ENC-002는 one_way_only, K-ENC-003은 unique_id 분류, K-ENC-004는 모든 항목을 대상으로 한다.",
+    "category": "authentication = 제2조 제11호 인증정보. unique_id = 고유식별정보. financial = 제7조 제2항이 열거한 금융 관련 항목(고유식별정보는 아니다). general = 개인정보 보호법 제2조의 일반 개인정보 후보이며 현재 제7조 제4항 전송 판정에만 쓴다. 분류는 판정 대상 결정에 쓰이므로 조항 문언을 넘어서 넓히지 않는다.",
+    "source_policy": "aliases는 공개 출처(행정안전부 행정표준용어, 공공데이터포털 표준 데이터 항목, 공개된 본인확인·PG API 규격, 공개 저장소, 일반 약어 관행)에서만 수집한다. 출처를 명시할 수 없는 항목은 등재하지 않는다. 특정 조직의 내부 스키마를 옮겨 적지 않는다.",
+    "source_note": "2026-09-05 공공데이터포털의 공공데이터 공통표준 8차 원본 XLSX(2025.11월)와 공개 법령·개인정보파일·API·표준·저장소 원문을 교차 확인했다. 일반 개인정보는 공통표준의 성명/FLNM/Full Name, 이메일주소/EML_ADDR, 휴대전화번호/MBL_TELNO와 사용자·회원·고객 한정 용어를 반영했다. name·email·phone처럼 다른 뜻이나 비개인 연락처 가능성이 있는 표기는 제외하거나 weak로 둔다. 별칭별 근거와 원본 해시는 rules/alias_sources.json에 있다. (D-19)",
+    "verification": "tests/run_fixtures.py의 '항목 사전' 절이 별칭 형식·중복·필수 필드·매칭 기대값과 rules/alias_sources.json의 전수 근거 연결을 검사한다. 기대값은 tests/dictionary_cases.json에 있다. 활성 규칙의 코드 fixture가 별칭 전체를 실행하지는 않으므로 사전은 별도 계약으로 검증한다. (D-15, D-19)"
+  },
+
+  "name_prefixes": [
+    "get", "set", "is", "has",
+    "change", "update", "reset", "verify", "validate", "match", "compare",
+    "encode", "decode", "hash", "digest", "encrypt", "decrypt",
+    "save", "store", "find", "load", "read", "write",
+    "member", "members", "user", "users", "login", "admin", "manager", "operator",
+    "cust", "customer", "client", "account", "acct", "owner", "holder",
+    "new", "old", "current", "cur", "prev", "next",
+    "temp", "tmp", "raw", "plain", "plaintext", "clear", "input", "confirm", "check",
+    "org", "orig", "original", "target", "source",
+    "enc", "encrypted", "encoded", "hashed", "hash", "masked",
+    "db", "stored", "saved", "persisted",
+    "req", "request", "res", "response", "this"
+  ],
+
+  "items": [
+    {
+      "key": "password",
+      "label": "비밀번호",
+      "category": "authentication",
+      "article": "제7조 제1항",
+      "article_quote": "개인정보처리자는 비밀번호, 생체인식정보 등 인증정보를 저장 또는 정보통신망을 통하여 송ㆍ수신하는 경우에 이를 안전한 암호 알고리즘으로 암호화하여야 한다. 다만, 비밀번호를 저장하는 경우에는 복호화되지 아니하도록 일방향 암호화하여 저장하여야 한다.",
+      "definition": "제2조 제8호 — 정보주체 및 개인정보취급자 등이 개인정보처리시스템 또는 정보통신망을 관리하는 시스템 등에 접속할 때 식별자와 함께 입력하여 정당한 접속 권한을 가진 자라는 것을 인증할 수 있도록 시스템에 전달해야 하는 고유의 문자열",
+      "encryption": "one_way_only",
+      "aliases_strong": [
+        "password",
+        "passwd",
+        "pwd",
+        "pswd",
+        "passwrd",
+        "pword",
+        "simplepassword"
+      ],
+      "aliases_weak": [
+        "pw",
+        "pass",
+        "credential"
+      ],
+      "source": "공공데이터 공통표준 8차의 Password/PSWD + Google·Microsoft 공개 저장소의 비밀번호 식별자 + 토스페이먼츠 공개 간편결제 문서"
+    },
+    {
+      "key": "pin",
+      "label": "간편인증 PIN",
+      "category": "authentication",
+      "article": "제7조 제1항",
+      "article_quote": "개인정보처리자는 비밀번호, 생체인식정보 등 인증정보를 저장 또는 정보통신망을 통하여 송ㆍ수신하는 경우에 이를 안전한 암호 알고리즘으로 암호화하여야 한다. 다만, 비밀번호를 저장하는 경우에는 복호화되지 아니하도록 일방향 암호화하여 저장하여야 한다.",
+      "definition": "제2조 제11호 — 개인정보처리시스템 또는 정보통신망을 관리하는 시스템 등에 접속을 요청하는 자의 신원을 검증하는데 사용되는 정보(인증정보). 간편결제·간편로그인 PIN은 식별자와 함께 입력하는 인증 문자열로 제2조 제8호의 비밀번호에 해당한다.",
+      "encryption": "one_way_only",
+      "aliases_strong": [
+        "authpin",
+        "loginpin"
+      ],
+      "aliases_weak": [
+        "pin",
+        "pinno",
+        "pincode",
+        "pinnumber",
+        "simplepin"
+      ],
+      "source": "PCI SSC 공개 용어집의 인증용 PIN 정의 + 공개 결제 문서에서 확인한 상품권 PIN의 반례",
+      "source_note": "PIN은 인증 비밀번호라는 공개 표준 정의가 있지만 상품권 번호 등 비인증 식별자에도 쓰인다. authPin·loginPin처럼 인증 문맥이 식별자에 포함된 경우만 strong이고 단독·번호형 표기는 weak다."
+    },
+    {
+      "key": "residentRegistrationNumber",
+      "label": "주민등록번호",
+      "category": "unique_id",
+      "article": "제7조 제2항 제1호",
+      "article_quote": "개인정보처리자는 다음 각 호의 해당하는 이용자의 개인정보에 대해서는 안전한 암호 알고리즘으로 암호화하여 저장하여야 한다. 1. 주민등록번호",
+      "definition": "제7조 제2항 제1호에 항목명 그대로 열거되어 있다. 고시는 별도 정의를 두지 않는다.",
+      "encryption": "two_way_allowed",
+      "note": "제7조 제3항 제2호 단서는 '주민등록번호 외의 고유식별정보'에만 적용범위 조정을 허용한다. 따라서 주민등록번호는 내부망 저장에서도 예외가 없다. K-ENC-003이 .pipa.json의 storageZone·riskAssessment와 함께 이 분기를 판정한다. (D-20)",
+      "aliases_strong": [
+        "residentregistrationnumber",
+        "residentregistrationno",
+        "residentregno",
+        "rrn",
+        "rrno",
+        "jumin",
+        "juminno",
+        "juminnumber"
+      ],
+      "aliases_weak": [
+        "residentnumber",
+        "residentno",
+        "ssn",
+        "socialsecuritynumber"
+      ],
+      "source": "고시 제7조 제2항 제1호 + 공공데이터 공통표준 8차의 Resident Registration Number/RRNO + 공개 저장소의 RRN·jumin 관행과 SSN 반례",
+      "source_note": "공통표준의 공식 약어는 RRNO이고 공개 개인정보 도구도 한국 주민등록번호를 KR_RRN으로 구분한다. SSN은 미국 제도의 별도 항목이므로 국내 관행을 고려해 후보에는 남기되 weak로 둔다. registration이 빠진 residentNumber·residentNo도 같은 이유로 weak다."
+    },
+    {
+      "key": "passportNumber",
+      "label": "여권번호",
+      "category": "unique_id",
+      "article": "제7조 제2항 제2호",
+      "article_quote": "개인정보처리자는 다음 각 호의 해당하는 이용자의 개인정보에 대해서는 안전한 암호 알고리즘으로 암호화하여 저장하여야 한다. 2. 여권번호",
+      "definition": "제7조 제2항 제2호에 항목명 그대로 열거되어 있다. 고시는 별도 정의를 두지 않는다.",
+      "encryption": "two_way_allowed",
+      "aliases_strong": [
+        "passportnumber",
+        "passportno",
+        "passportnum"
+      ],
+      "aliases_weak": [
+        "passport",
+        "pno"
+      ],
+      "source": "고시 제7조 제2항 제2호 + 공공데이터 공통표준 8차의 Passport Number/PNO",
+      "source_note": "passport 단독은 여권 사본·여권 객체를 가리키는 경우가 많아 weak에 둔다."
+    },
+    {
+      "key": "driverLicenseNumber",
+      "label": "운전면허번호",
+      "category": "unique_id",
+      "article": "제7조 제2항 제3호",
+      "article_quote": "개인정보처리자는 다음 각 호의 해당하는 이용자의 개인정보에 대해서는 안전한 암호 알고리즘으로 암호화하여 저장하여야 한다. 3. 운전면허번호",
+      "definition": "제7조 제2항 제3호에 항목명 그대로 열거되어 있다. 고시는 별도 정의를 두지 않는다.",
+      "encryption": "two_way_allowed",
+      "aliases_strong": [
+        "driverlicensenumber",
+        "driverlicenseno",
+        "driverslicensenumber",
+        "driverslicenseno",
+        "drivinglicensenumber",
+        "drivinglicenseno",
+        "driverlicencenumber",
+        "driverlicenceno"
+      ],
+      "aliases_weak": [
+        "driverlicense",
+        "driverslicense",
+        "licensenumber",
+        "licenseno",
+        "dln"
+      ],
+      "source": "고시 제7조 제2항 제3호 + 공공데이터 공통표준 8차의 Driver's License Number/DLN + licence/license 개발 표기",
+      "source_note": "licenseNumber·licenseNo는 소프트웨어 라이선스 번호일 가능성이 높아 weak에 둔다. weak는 차단하지 않고 경고만 한다."
+    },
+    {
+      "key": "alienRegistrationNumber",
+      "label": "외국인등록번호",
+      "category": "unique_id",
+      "article": "제7조 제2항 제4호",
+      "article_quote": "개인정보처리자는 다음 각 호의 해당하는 이용자의 개인정보에 대해서는 안전한 암호 알고리즘으로 암호화하여 저장하여야 한다. 4. 외국인등록번호",
+      "definition": "제7조 제2항 제4호에 항목명 그대로 열거되어 있다. 고시는 별도 정의를 두지 않는다.",
+      "encryption": "two_way_allowed",
+      "aliases_strong": [
+        "alienregistrationnumber",
+        "alienregistrationno",
+        "alienregno",
+        "foreignerregistrationnumber",
+        "foreignerregistrationno",
+        "foreignregistrationnumber",
+        "foreignregistrationno"
+      ],
+      "aliases_weak": [
+        "frno"
+      ],
+      "source": "고시 제7조 제2항 제4호 + 공공데이터 공통표준 8차의 Foreigner Registration Number/FRNO + alien/foreigner 개발 표기",
+      "source_note": "arn은 클라우드 리소스 식별자(Amazon Resource Name)로 훨씬 널리 쓰이므로 등재하지 않는다."
+    },
+    {
+      "key": "creditCardNumber",
+      "label": "신용카드번호",
+      "category": "financial",
+      "article": "제7조 제2항 제5호",
+      "article_quote": "개인정보처리자는 다음 각 호의 해당하는 이용자의 개인정보에 대해서는 안전한 암호 알고리즘으로 암호화하여 저장하여야 한다. 5. 신용카드번호",
+      "definition": "제7조 제2항 제5호에 항목명 그대로 열거되어 있다. 고시는 별도 정의를 두지 않는다.",
+      "encryption": "two_way_allowed",
+      "aliases_strong": [
+        "creditcardnumber",
+        "creditcardno",
+        "creditcardnum",
+        "crcdno",
+        "primaryaccountnumber"
+      ],
+      "aliases_weak": [
+        "cardnumber",
+        "cardno",
+        "cardnum",
+        "creditcard",
+        "pan"
+      ],
+      "source": "고시 제7조 제2항 제5호 + 공공데이터 공통표준 8차의 Credit Card/CRCD_NO + 토스페이먼츠 cardNumber + PCI SSC PAN",
+      "source_note": "cardNumber·cardNo는 회원카드·포인트카드 번호일 수 있어 weak에 둔다. 신용카드로 한정된 표기만 strong이다."
+    },
+    {
+      "key": "accountNumber",
+      "label": "계좌번호",
+      "category": "financial",
+      "article": "제7조 제2항 제6호",
+      "article_quote": "개인정보처리자는 다음 각 호의 해당하는 이용자의 개인정보에 대해서는 안전한 암호 알고리즘으로 암호화하여 저장하여야 한다. 6. 계좌번호",
+      "definition": "제7조 제2항 제6호에 항목명 그대로 열거되어 있다. 고시는 별도 정의를 두지 않는다.",
+      "encryption": "two_way_allowed",
+      "aliases_strong": [
+        "bankaccountnumber",
+        "bankaccountno",
+        "depositaccountnumber",
+        "depositaccountno",
+        "virtualaccountnumber",
+        "virtualaccountno",
+        "withdrawalaccountno",
+        "refundaccountno"
+      ],
+      "aliases_weak": [
+        "accountnumber",
+        "accountno",
+        "acctnumber",
+        "acctno",
+        "actno"
+      ],
+      "source": "고시 제7조 제2항 제6호 + 공공데이터 공통표준 8차의 Account Number/ACTNO와 계좌번호 용어 + 토스페이먼츠 accountNumber·bankAccountNumber",
+      "source_note": "accountNumber·accountNo는 회계 계정번호나 고객번호를 뜻하는 경우가 많아 weak에 둔다. 은행 계좌로 한정된 표기만 strong이다."
+    },
+    {
+      "key": "biometricRecognitionInfo",
+      "label": "생체인식정보",
+      "category": "authentication",
+      "article": "제7조 제2항 제7호",
+      "article_quote": "개인정보처리자는 다음 각 호의 해당하는 이용자의 개인정보에 대해서는 안전한 암호 알고리즘으로 암호화하여 저장하여야 한다. 7. 생체인식정보",
+      "definition": "제2조 제10호 — 생체정보 중 특정 개인을 인증 또는 식별할 목적으로 일정한 기술적 수단을 통해 처리되는 정보",
+      "encryption": "two_way_allowed",
+      "note": "제7조 제1항은 생체인식정보를 인증정보의 예로 들어 암호화를 요구하지만, 같은 항 단서의 '복호화되지 아니하도록 일방향 암호화'는 '비밀번호를 저장하는 경우'만 규율한다. 따라서 생체인식정보는 양방향 암호화가 적법하며 K-ENC-002의 대상이 아니다. 방어선은 C015다.",
+      "aliases_strong": [
+        "biometricrecognitioninfo",
+        "biometrictemplate",
+        "fingerprinttemplate",
+        "facetemplate",
+        "iristemplate",
+        "veintemplate",
+        "voiceprint"
+      ],
+      "aliases_weak": [
+        "biometric",
+        "biometricinfo",
+        "faceembedding",
+        "faceimage"
+      ],
+      "source": "고시 제2조 제9호·제10호 + KISA 생체정보 보호 안내서 + NIST 생체 템플릿·voiceprint 문서 + FaceNet 원 논문",
+      "source_note": "fingerprint 단독은 인증서 지문·브라우저 지문·파일 해시를 뜻하는 쓰임이 압도적으로 많아 등재하지 않는다. 방어선은 tests/dictionary_cases.json의 no_match에 고정했다."
+    },
+    {
+      "key": "fullName",
+      "label": "성명",
+      "category": "general",
+      "article": "제7조 제4항",
+      "article_quote": "개인정보처리자는 개인정보를 정보통신망을 통하여 인터넷망 구간으로 송ㆍ수신하는 경우에는 이를 안전한 암호 알고리즘으로 암호화하여야 한다.",
+      "definition": "개인정보 보호법 제2조 제1호는 성명을 통하여 개인을 알아볼 수 있는 정보를 개인정보로 정의한다. 공공데이터 공통표준 8차는 성명/FLNM/Full Name을 '성과 이름을 아울러 이르는 말'로 정의한다.",
+      "encryption": "transmission_only",
+      "aliases_strong": [
+        "fullname"
+      ],
+      "aliases_weak": [
+        "flnm"
+      ],
+      "source": "개인정보 보호법 제2조 제1호 + 공공데이터 공통표준 8차의 성명/FLNM/Full Name",
+      "source_note": "name·nm은 공통표준에서도 사물·단체·현상의 이름을 포함하므로 등재하지 않는다. FLNM은 공통표준 공식 약어지만 file name 약어와 충돌할 수 있어 weak로 둔다."
+    },
+    {
+      "key": "emailAddress",
+      "label": "이메일 주소",
+      "category": "general",
+      "article": "제7조 제4항",
+      "article_quote": "개인정보처리자는 개인정보를 정보통신망을 통하여 인터넷망 구간으로 송ㆍ수신하는 경우에는 이를 안전한 암호 알고리즘으로 암호화하여야 한다.",
+      "definition": "개인정보보호위원회가 공개한 개인정보파일은 정보주체의 이메일·전자우편·전자우편주소를 개인정보 항목으로 명시한다. 공공데이터 공통표준 8차는 이메일주소/EML_ADDR와 사용자·회원·고객 이메일주소를 정의한다.",
+      "encryption": "transmission_only",
+      "aliases_strong": [
+        "useremailaddress",
+        "memberemailaddress",
+        "customeremailaddress"
+      ],
+      "aliases_weak": [
+        "emailaddress",
+        "emailaddr",
+        "email",
+        "emladdr"
+      ],
+      "source": "개인정보보호위원회 개인정보파일 + 공공데이터 공통표준 8차의 이메일주소/EML_ADDR 및 사용자·회원·고객 한정 용어",
+      "source_note": "일반 이메일 주소는 기관·업체·회사 대표 주소일 수 있다. 공개 표준이 사람 역할을 명시한 user·member·customer 한정 표기만 strong이고 일반형은 weak다. mail 단독은 전자우편 메시지나 발송 기능을 뜻할 수 있어 등재하지 않는다."
+    },
+    {
+      "key": "mobilePhoneNumber",
+      "label": "휴대전화번호",
+      "category": "general",
+      "article": "제7조 제4항",
+      "article_quote": "개인정보처리자는 개인정보를 정보통신망을 통하여 인터넷망 구간으로 송ㆍ수신하는 경우에는 이를 안전한 암호 알고리즘으로 암호화하여야 한다.",
+      "definition": "개인정보보호위원회가 공개한 개인정보파일은 정보주체의 전화번호·휴대전화번호를 개인정보 항목으로 명시한다. 공공데이터 공통표준 8차는 전화번호/TELNO와 휴대전화번호/MBL_TELNO 및 사용자·회원·고객 휴대전화번호를 정의한다.",
+      "encryption": "transmission_only",
+      "aliases_strong": [
+        "usermobilephonenumber",
+        "usermobiletelephonenumber",
+        "membermobilephonenumber",
+        "membermobiletelephonenumber",
+        "customermobilephonenumber",
+        "customermobiletelephonenumber"
+      ],
+      "aliases_weak": [
+        "mobilephonenumber",
+        "mobilephoneno",
+        "mobiletelephonenumber",
+        "mobiletelephoneno",
+        "phonenumber",
+        "phoneno",
+        "telephonenumber",
+        "telephoneno",
+        "telno",
+        "mbltelno"
+      ],
+      "source": "개인정보보호위원회 개인정보파일 + 공공데이터 공통표준 8차의 전화번호/TELNO·휴대전화번호/MBL_TELNO 및 사용자·회원·고객 한정 용어",
+      "source_note": "일반 전화번호는 기관 대표번호나 공용 단말 번호일 수 있다. 공개 표준이 사람 역할을 명시한 user·member·customer 한정 표기만 strong이고 일반형과 공식 약어는 weak다. phone 단독은 기기 객체를 뜻할 수 있어 등재하지 않는다."
+    }
+  ]
+}
