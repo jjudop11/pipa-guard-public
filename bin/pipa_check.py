@@ -592,6 +592,17 @@ CONVERT_RE = re.compile(
 CRYPTO_WORD_RE = re.compile(r"AES|Aes|ARIA|Aria|SEED|Seed|Cipher|Crypto|Encrypt|Decrypt|TwoWay|Reversible|Symmetric")
 ONEWAY_WORD_RE = re.compile(r"BCrypt|Bcrypt|BCRYPT|Argon|SCrypt|Scrypt|Pbkdf|PBKDF|Hash|Digest|OneWay|SHA|Sha")
 EQUALS_RE = re.compile(r"\.\s*equals(?:IgnoreCase)?\s*\(")
+HASH_CALL_RE = re.compile(
+    r"\b([A-Za-z_$][\w$]*)\s*\.\s*(digest|update)\s*\(([^)]*)\)", re.IGNORECASE,
+)
+SALT_IDENT_RE = re.compile(
+    r"\b(?:salt|[A-Za-z_$][\w$]*salt[\w$]*)\b", re.IGNORECASE,
+)
+ITERATION_LOOP_RE = re.compile(
+    r"\b(?:for|while)\s*\([^)]*\b(?:iterations?|rounds?|"
+    r"[A-Za-z_$][\w$]*(?:iteration|round)[\w$]*)\b",
+    re.IGNORECASE,
+)
 
 # K-ENC-001 저장 구조. Kotlin의 use-site target(@field:)도 Java 어노테이션과 같은 의미로 본다.
 USE_SITE = r"(?:(?:field|get|set|property|param|receiver):)?"
@@ -2922,6 +2933,55 @@ def rule_article7_internet_transmission(src: Source, dic: Dictionary) -> list[Fi
     return findings
 
 
+def _has_linked_salt_and_iterations(
+    src: Source, scopes: list[str], statement_index: int,
+) -> bool:
+    """강한 일반 해시에 salt 입력과 반복 작업이 같은 메서드에서 연결됐는지 본다.
+
+    파일 어딘가의 ``salt``·``iteration`` 단어만으로 경고를 없애면 무관한 라벨이나
+    설정이 실제 비밀번호 해시의 보호조치로 오인된다. 비밀번호가 도달한 digest 수신자에
+    salt 식별자가 입력되고, 같은 메서드의 반복문 안에서 그 수신자가 다시 digest를
+    수행하는 좁은 형태만 인정한다. 완전한 데이터 흐름 분석은 아니므로 이 근거가 없으면
+    기존과 같이 medium 경고를 유지한다.
+    """
+    if statement_index >= len(scopes):
+        return False
+    scope = scopes[statement_index]
+    if scope == "<file>":
+        return False
+
+    statement = STRING_LITERAL_RE.sub(" ", src.statements[statement_index].text)
+    hash_call = HASH_CALL_RE.search(statement)
+    if not hash_call:
+        return False
+    receiver = normalize_ident(hash_call.group(1))
+
+    scoped: list[tuple[int, str]] = []
+    for index, (candidate, candidate_scope) in enumerate(zip(src.statements, scopes)):
+        if candidate_scope != scope:
+            continue
+        scoped.append((index, STRING_LITERAL_RE.sub(" ", candidate.text)))
+
+    calls: list[tuple[int, str, str, str]] = []
+    for index, text in scoped:
+        for match in HASH_CALL_RE.finditer(text):
+            calls.append((index, normalize_ident(match.group(1)),
+                          match.group(2).lower(), match.group(3)))
+    salt_reaches_receiver = any(
+        call_receiver == receiver and SALT_IDENT_RE.search(arguments)
+        for _index, call_receiver, _operation, arguments in calls
+    )
+    if not salt_reaches_receiver:
+        return False
+
+    loop_indexes = [index for index, text in scoped if ITERATION_LOOP_RE.search(text)]
+    return any(
+        call_receiver == receiver and operation == "digest" and index >= loop_index
+        for loop_index in loop_indexes
+        for index, call_receiver, operation, _arguments in calls
+    )
+
+
 def rule_password_one_way(src: Source, dic: Dictionary) -> list[Finding]:
     findings: list[Finding] = []
     file_has_safe = _any(SAFE_ONE_WAY, STRING_LITERAL_RE.sub(" ", src.code))
@@ -2929,7 +2989,7 @@ def rule_password_one_way(src: Source, dic: Dictionary) -> list[Finding]:
     # 전파 결과가 필요한 인증정보 문장이 있을 때만 파일 전체를 분석한다.
     # 선언 순서·지역 범위 판정은 그대로 유지하고, 같은 파일에서는 한 번만 계산한다.
     receivers: list[dict] | None = None
-    strong_hash_stmts: list[tuple[Statement, str]] = []
+    strong_hash_stmts: list[tuple[int, Statement, str]] = []
 
     for index, st in enumerate(src.statements):
         hits = _auth_hits(st.text, dic)
@@ -3036,9 +3096,9 @@ def rule_password_one_way(src: Source, dic: Dictionary) -> list[Finding]:
             ))
             continue
 
-        # (E) 안전한 해시를 쓰지만 salt/반복이 보이지 않음 — 파일 단위로 판정한다.
+        # (E) 안전한 일반 해시를 쓰지만 같은 흐름의 salt/반복 근거가 보이지 않음.
         if strong_in_stmt and not stmt_safe:
-            strong_hash_stmts.append((st, label))
+            strong_hash_stmts.append((index, st, label))
 
         # (F) 평문 비교로 보이는 인증 — 확인 입력 비교와 구분이 불가능하므로 경고만 한다.
         if (EQUALS_RE.search(st.text)
@@ -3057,12 +3117,12 @@ def rule_password_one_way(src: Source, dic: Dictionary) -> list[Finding]:
                 evidence=evidence,
             ))
 
-    # (E) 마무리 — 파일 어디에도 salt/반복 신호가 없을 때만 보고한다.
-    if strong_hash_stmts and not _any(
-        [r"[Ss]alt", r"[Ii]teration", r"\bPBKDF2|\bPbkdf2", r"\bBCrypt\b",
-         r"\bArgon2\b", r"\bSCrypt\b", r"\bHmac"], src.code
-    ):
-        st, label = strong_hash_stmts[0]
+    # (E) 마무리 — 같은 digest 흐름에서 salt 입력과 반복을 확인하지 못하면 보고한다.
+    method_scopes = _crypto_method_scopes(src) if strong_hash_stmts else []
+    unresolved = [entry for entry in strong_hash_stmts
+                  if not _has_linked_salt_and_iterations(src, method_scopes, entry[0])]
+    if unresolved:
+        _index, st, label = unresolved[0]
         findings.append(Finding(
             rule="K-ENC-002", check="unsalted-hash",
             confidence="medium",
