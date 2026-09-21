@@ -49,8 +49,8 @@
         {
           "check": "unsalted-hash",
           "confidence": "medium",
-          "detects": "salt·반복 없는 단순 해시 (파일 단위 판정)",
-          "fixtures": ["V010_PasswordUnsaltedSha256.java", "C014_SaltedIteratedSha256.java"]
+          "detects": "같은 digest 흐름에서 salt 입력·반복 근거가 없는 단순 해시",
+          "fixtures": ["V010_PasswordUnsaltedSha256.java", "V077_UnrelatedSaltMarkerSha256.java", "C014_SaltedIteratedSha256.java", "C100_SaltAndRoundsReachPasswordDigest.java"]
         },
         {
           "check": "plaintext-compare",

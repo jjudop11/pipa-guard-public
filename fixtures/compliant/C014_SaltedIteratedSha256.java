@@ -1,7 +1,6 @@
 // pipa-fixture-expect-clean
-// V010과 같은 SHA-256 해시지만 salt와 반복 횟수가 있다. unsalted-hash 판정은 문장이
-// 아니라 파일 단위로 salt/반복 신호를 보는데, 그 게이트가 없으면 이 파일이 경고로
-// 새어 나온다. 경고 0건까지 고정하는 방어선이다.
+// V010과 같은 SHA-256 해시지만 salt가 digest 수신자에 입력되고 같은 메서드에서
+// 반복 처리된다. 경고 0건까지 고정하는 방어선이다.
 package com.example.member;
 
 import java.nio.charset.StandardCharsets;
